@@ -83,7 +83,6 @@ class PageManager {
                 if (page) {
                     let newPageObject = { page: page.page, index: page.index, active: true };
                     this.#pages[page.index] = newPageObject;
-                    console.log(`Took page nr ${page.index}`);
                     resolve(newPageObject);
                 } else {
                     setTimeout(tryGetPage, 100);
@@ -101,7 +100,6 @@ class PageManager {
         let page = this.#pages[index];
         if (page) {
             let newPageObject = {page:page.page,index:page.index, active: false };
-            console.log(`Returned page nr ${index}`);
             this.#pages[index] = newPageObject;
         }
     }

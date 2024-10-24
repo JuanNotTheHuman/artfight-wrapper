@@ -216,7 +216,7 @@ class ArtfightScrapper{
         this.pages.return(index);
         return new Character(x[0],x[1],created,images,description,"WIP",attacks,new CharacterInformation(...information),tags);
     }
-    /**
+    /**`
      * @param {Page} page 
      */
     async fetchUserCharacterAttacks(page,id,name){
