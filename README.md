@@ -2,7 +2,7 @@
 This repository isn't in any way affiliated with artfight and is simply a fanmade project.
 # Contribute
 Feel free to suggest changes/code them yourself, if i think the code makes something more efficient or adds a useful feature, then i'll surely add it.
-<u>I won't add a option to submit an attack via code ever</u>
+I won't add a option to submit an attack via code ever
 # To be added
 - Comments
 - Character permissions
@@ -10,3 +10,6 @@ Feel free to suggest changes/code them yourself, if i think the code makes somet
 - Check individual js files to see what needs to be added
 - Bookmarks
 - Expand the client user
+# Used packages:
+- [node-cache](https://www.npmjs.com/package/node-cache)
+- [puppeteer](https://www.npmjs.com/package/puppeteer)
