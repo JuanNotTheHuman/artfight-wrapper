@@ -1,37 +1,38 @@
 If you notice any missing documentation please reach out.
-# `ArtfightClient` (extends `EventEmitter`)
+# `ArtfightClient` (extends [EventEmitter](https://nodejs.org/en/learn/asynchronous-work/the-nodejs-event-emitter "Node.js documentation"))
 The client used to connect to Artfight.
 
 ## Properties:
-- #### scrapper `(ArtfightScrapper)`
+- #### scrapper ([ArtfightScrapper](#artfightscrapper))
   The client's scrapper, used to scrape the data from Artfight.
-- #### user `(ClientUser)`
+- #### user ([ClientUser](#clientuser-extends-user))
   The user that logged in via the client.
-- #### users `(UserManager)`
+- #### users ([UserManager](#usermanager-extends-manager))
   The manager containing all of Artfight users.
-- #### members `(MemberManager)`
+- #### members ([MemberManager](#membermanager-extends-manager))
   The manager containing all of Artfight's members (users who paid to support Artfight).
-- #### attacks `(SubmitionManager)`
+- #### attacks ([SubmitionManager](#sumbitionmanager-extends-manager))
   The manager containing all of Artfight's attacks.
-- #### defenses `(SubmitionManager)`
+- #### defenses ([SubmitionManager](#sumbitionmanager-extends-manager))
   The manager containing all of Artfight's defenses.
-- ### characters `(CharacterManager)`
+- ### characters ([CharacterManager](#charactermanager-extends-manager))
   The manager containing all of Artfight's characters.
-- ### completes `(Complete|Complete[])` ! In development
+- ### completes ([Complete](#complete--not-implemented)|[Complete](#complete--not-implemented)[])
+  *In development*
   The opposite of partials, defines which returned values are returned whole. (Characters, Comments, Users, Submissions, All)
 
 ## Methods:
 - ### login()
     - #### params:
-        - ##### username `(String)`
+        - ##### username ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
           The username which you want to login with to Artfight.
-        - ##### password `(String)`
+        - ##### password ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
           The user's password.
-        - ##### callback `(Function)`
+        - ##### callback ([Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions "Go to developer.mozilla.org"))
           The function that gets called on user login.
-        - ##### completes `(Complete|Complete[])`
+        - ##### completes ([Complete](#complete--not-implemented)|[Complete](#complete--not-implemented)[])
           Opposite of partials, determines which elements are returned whole (Characters, Comments, Users, Submissions, All).
-    - #### returns: `(Promise<void>)`
+    - #### returns: ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<void>)
       Logs in the user and initializes the client.
     - #### usage:
       ```javascript
@@ -39,22 +40,22 @@ The client used to connect to Artfight.
           console.log('Logged in as:', client.user.username);
       }, Complete.All);
       ```
-# `ArtfightScrapper` (extends `EventEmitter`)
+# `ArtfightScrapper`
 *[Internal class, not for public use]*
 The scrapper used to connect to Artfight and scrape data.
 
 ## Properties:
-- #### pages `(PageManager)`
+- #### pages ([PageManager](#pagemanager))
   The manager for handling multiple browser pages during scraping.
 
 ## Methods:
 - ### login()
     - #### params:
-        - ##### username `(String)`
+        - ##### username ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
           The Artfight username.
-        - ##### password `(String)`
+        - ##### password ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
           The Artfight password.
-    - #### returns: `(Promise<void>)`
+    - #### returns: ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<void>)
       Logs in the user and initializes page management.
     - #### usage:
       ```javascript
@@ -62,7 +63,7 @@ The scrapper used to connect to Artfight and scrape data.
       ```
 
 - ### logout()
-    - #### returns: `(Promise<void>)`
+    - #### returns: ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<void>)
       Logs out the user and closes the browser.
     - #### usage:
       ```javascript
@@ -71,9 +72,9 @@ The scrapper used to connect to Artfight and scrape data.
 
 - ### fetchUserStatus()
     - #### params:
-        - ##### username `(String)`
+        - ##### username ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
           The name of the user.
-    - #### returns: `(Promise<{lastseen: String, joined: String, team: String}> )`
+    - #### returns: ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{lastseen:[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"), joined:[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"), team:[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org")}> )
       The online status of the user.
     - #### usage:
       ```javascript
@@ -83,9 +84,9 @@ The scrapper used to connect to Artfight and scrape data.
 
 - ### fetchUserImage()
     - #### params:
-        - ##### username `(String)`
+        - ##### username ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
           The name of the user.
-    - #### returns: `(Promise<String>)`
+    - #### returns: ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org")>)
       The URL of the user's profile image.
     - #### usage:
       ```javascript
@@ -95,11 +96,11 @@ The scrapper used to connect to Artfight and scrape data.
 
 - ### fetchCharactersByTag()
     - #### params:
-        - ##### tags `(String | String[])`
+        - ##### tags ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org") | [String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org")[])
           Tags for character search.
-        - ##### limit `(Number)`
+        - ##### limit ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
           Maximum number of characters to return (default is 10).
-    - #### returns: `(Promise<Character[]>)`
+    - #### returns: ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[Character](#character)[]>)
       Array of characters matching the specified tags.
     - #### usage:
       ```javascript
@@ -109,9 +110,9 @@ The scrapper used to connect to Artfight and scrape data.
 
 - ### fetchUserStatistics()
     - #### params:
-        - ##### username `(String)`
+        - ##### username ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
           The name of the user.
-    - #### returns: `(Promise<{current: Array<String | Number>, overall: String[], achievements: Array<Array<String>>}>)`
+    - #### returns: ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{current:([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org")|[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))[], overall:[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org")[], achievements:[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org")[][]}>)
       User statistics including current, overall, and achievements.
     - #### usage:
       ```javascript
@@ -121,9 +122,9 @@ The scrapper used to connect to Artfight and scrape data.
 
 - ### fetchUserCharacters()
     - #### params:
-        - ##### username `(String)`
+        - ##### username ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
           The name of the user.
-    - #### returns: `(Promise<Character[]>)`
+    - #### returns: ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[Character](#character)[]>)
       Array of characters owned by the user.
     - #### usage:
       ```javascript
@@ -133,9 +134,9 @@ The scrapper used to connect to Artfight and scrape data.
 
 - ### fetchUserCharacter()
     - #### params:
-        - ##### link `(String)`
+        - ##### link ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
           The URL of the character.
-    - #### returns: `(Promise<Character>)`
+    - #### returns: ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[Character](#character)>)
       Character details scraped from the provided link.
     - #### usage:
       ```javascript
@@ -145,11 +146,11 @@ The scrapper used to connect to Artfight and scrape data.
 
 - ### fetchSubmitions()
     - #### params:
-        - ##### username `(String)`
+        - ##### username ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
           The name of the user.
-        - ##### limit `(Number)`
+        - ##### limit ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
           Maximum number of submissions to return.
-    - #### returns: `(Promise<Submition[]>)`
+    - #### returns: ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[Submition](#submitio[]>)
       Array of submissions for the specified user.
     - #### usage:
       ```javascript
@@ -205,9 +206,11 @@ The scrapper used to connect to Artfight and scrape data.
   The statistics of the user.
 - #### image `(String)`
   The URL to the users avatar.
-- #### comments `(Comment[])` ! In development
+- #### comments `(Comment[])`
+  *In development*
   The comments made on the users page.
-# `ClientUser` (extends `User`) ! In development
+# `ClientUser` (extends `User`)
+  *In development*
   The user that logged in via the client.
 ## Methods:
 
@@ -267,7 +270,8 @@ The scrapper used to connect to Artfight and scrape data.
   The number of points aquired by the member in his last event.
 - #### battleratio `(Number)`
   Number between `0` and `100` which shows the response rate of the member to attacks.
-# `SumbitionManager` (extends `Manager`) ! In development
+# `SumbitionManager` (extends `Manager`)
+  *In development*
   The manager of artfights submitions (attacks and defenses).
 ## Properties:
 - #### type `("attack"|"defense")`
@@ -323,7 +327,8 @@ The scrapper used to connect to Artfight and scrape data.
   Information abount the character (who owns it/who designed it).
 - #### tags `(String[])`
   Tags the character is associated with.
-- #### comments `(Comment[])` ! In development
+- #### comments `(Comment[])`
+  *In development*
   Comments made on the character.
 ## Methods:
 - ### link()
@@ -351,3 +356,70 @@ The scrapper used to connect to Artfight and scrape data.
   When fetching submitions, fetch all the possible data.
 - #### All `(5)`
   When fetching everything, fetch all the possible data.
+# PageManager
+A manager for the scappers pages
+## Properties:
+- #### length ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
+  The amount of pages managed by the page manager.
+## Methods:
+- ### init()
+  - #### params:
+    - ##### browser ([Browser](https://pptr.dev/api/puppeteer.browser/))
+    The browser to create the pages in.
+  - #### returns ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<void>)
+    Initializes the page manager.
+# Sumbition
+An artfight submition.
+## Properties:
+- #### information (SubmitionInformation)
+  Information about the submition.
+- #### statistics (SubmitionStatistics)
+  The statistics of the submition.
+- #### revenge ({previous?:Revenge|undefined, next?:Revenge|undefined"})
+  Submition's revenge information.
+- #### timestamp (String)
+  Timestamp of when the submition got posted.
+- #### polished (Boolean)
+  Whether the submition is marked polished.
+- #### friendlyfire (Boolean)
+  Whether the submition was sent from someone on the same team.
+- #### comments (Comment[])
+  Comments made on the submition.
+# SubmitionInformation
+  Information about a submition.
+## Properties:
+  - #### from (String)
+    The username of the user that posted the submiton.
+  - #### to (String)
+    The username of the user that the submition was made for.
+  - #### team (String)
+    The name of the team of the user posting.
+  - #### characters (SubmitonCharacter[])
+    List of characters in the submition.
+# SubmitionCharacter
+  A character in the submition.
+## Properties:
+- #### type (String)
+  The state of the character in the submition (Head shot/Fullbody, ect.)
+- #### link (String)
+  Link to the character's page.
+- #### image (String)
+  Not sure, added it really long ago and can't figure it out.
+# SubmitionStatistics
+*In development*
+Statistics of a submition.
+## Properties:
+- #### points (Number)
+  Number of points awarded for the submition.
+- #### character_count (Number)
+  Amount of characters in the submition.
+- #### type (String)
+  The type of submition (Drawing/Animation, ect.)
+- #### finish (String)
+  The point of finish of the drawing
+- #### color (String)
+  The point of coloring of the drawing
+- #### shading
+  The point of shading of the drawing
+- #### background
+  The state of background of the drawing

@@ -258,6 +258,7 @@ class ArtfightScrapper{
         }
     }
     /**
+     * URGENT NEED TO UPDATE, COZ THERES NOTHING LIKE this.type
      * @param {String} username 
      * @param {Number} limit
      * @returns {Promise<Submition[]>}

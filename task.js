@@ -49,9 +49,7 @@ class PageManager {
         return this.#pages.length;
     }
     /**
-     * 
      * @param {Browser} browser 
-     * @param {Number} limit
      */
     async init(browser) {
         for (let index = 0; index < maxpages; index++) {

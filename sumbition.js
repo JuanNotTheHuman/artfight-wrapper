@@ -119,7 +119,7 @@ class Submition{
      * @param {String} timestamp
      * @param {Boolean} friendlyfire
      * @param {{movement_amount:String,technique:String}} animation TBA
-     * @param {Boolean} polished TBA
+     * @param {Boolean} polished
      * @param {Comment[]} comments TBA
      */
     constructor(information,statistics,revenge,timestamp,friendlyfire,animation,polished,comments){
