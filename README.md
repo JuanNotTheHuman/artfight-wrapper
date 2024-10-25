@@ -11,6 +11,8 @@ I won't add a option to submit an attack via code ever
 - Bookmarks
 - Expand the client user
 - Client events
+# Documentation
+[DOCUMENTATION.md](https://github.com/JuanNotTheHuman/Artfight/blob/main/DOCUMENTATION.md)
 # Used packages:
 - [node-cache](https://www.npmjs.com/package/node-cache)
 - [puppeteer](https://www.npmjs.com/package/puppeteer)
