@@ -11,6 +11,7 @@ I won't add a option to submit an attack via code ever
 - Bookmarks
 - Expand the client user
 - Client events
+- More...
 # Documentation
 [DOCUMENTATION.md](https://github.com/JuanNotTheHuman/Artfight/blob/main/DOCUMENTATION.md)
 # Used packages:
