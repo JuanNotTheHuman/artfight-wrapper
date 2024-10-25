@@ -150,7 +150,7 @@ The scrapper used to connect to Artfight and scrape data.
           The name of the user.
         - ##### limit ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
           Maximum number of submissions to return.
-    - #### returns: ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[Submition](#submitio[]>)
+    - #### returns: ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[Submition](#sumbition)[]>)
       Array of submissions for the specified user.
     - #### usage:
       ```javascript
@@ -160,9 +160,9 @@ The scrapper used to connect to Artfight and scrape data.
 
 - ### fetchMembers()
     - #### params:
-        - ##### limit `(Number)`
+        - ##### limit ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
           Maximum number of members to return.
-    - #### returns: `(Promise<Array<{username: String, lastseen: String, points: Number, battleratio: Number}>>)`
+    - #### returns: ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{username:[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"), lastseen:[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"), points:[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number), battleratio:[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)}[]>)
       List of Artfight members with their details.
     - #### usage:
       ```javascript
@@ -171,7 +171,7 @@ The scrapper used to connect to Artfight and scrape data.
       ```
 
 - ### fetchRandomUsername()
-    - #### returns: `(Promise<String>)`
+    - #### returns: ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org")>)
       A random username from Artfight.
     - #### usage:
       ```javascript
@@ -180,7 +180,7 @@ The scrapper used to connect to Artfight and scrape data.
       ```
 
 - ### fetchRandomCharacter()
-    - #### returns: `(Promise<Character>)`
+    - #### returns: ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[Character](#character)>)
       A random character from Artfight.
     - #### usage:
       ```javascript
@@ -190,44 +190,60 @@ The scrapper used to connect to Artfight and scrape data.
 # `User`
   An artfight user.
 ## Properties:
-- #### client `(ArtfightClient)`
+- #### client ([ArtfightClient](#artfightclient-extends-eventemitter))
   The users artfight client.
-- #### username `(String)`
+- #### username ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   The users name.
-- #### status `(UserStatus)`
+- #### status ([UserStatus](#userstatus))
   The users status.
-- #### attacks `(SubmitionManager)`
+- #### attacks ([SubmitionManager](#sumbitionmanager-extends-manager))
   The manager of the attacks made by the user.
-- #### defenses `(SubmitionManager)`
+- #### defenses ([SubmitionManager](#sumbitionmanager-extends-manager))
   The manager of the defenses made against the user.
-- #### characters `(CharacterManager)`
+- #### characters ([CharacterManager](#charactermanager-extends-manager))
   The manager of the users characters.
-- #### statistics `(UserStatistics)`
+- #### statistics ([UserStatistics](#userstatistics))
   The statistics of the user.
-- #### image `(String)`
+- #### image ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   The URL to the users avatar.
-- #### comments `(Comment[])`
-  *In development*
+- #### comments ([Comment](#comment)[])
   The comments made on the users page.
-# `ClientUser` (extends `User`)
+# `UserStatus`
+  The user's status
+## Properties:
+- #### lastseen ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
+  Timestamp of when the user was last seen online.
+- #### joined ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
+  Timestamp of when the user registered for artfight.
+- #### team ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
+  The name of the team that the user is currently in.
+# `UserStatistics`
+  The user's statistics
+## Properties:
+- #### overall ([BattleStatistics](#battlestatistics))
+  Overall artfight statistics.
+- #### current ([BattleStatistics](#battlestatistics))
+  Current artfight statistics (from the current/most recent event).
+- #### achivement ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org")[][])
+  The user's achivements
+# `ClientUser` (extends [User](#user))
   *In development*
   The user that logged in via the client.
 ## Methods:
-
 - ### init()
-  - #### returns `(Promise<User>)`
+  - #### returns ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[User](#user)>)
   *[Internal method, not for public use]* Initializes the user.
-# `UserManager` (extends `Manager`)
+# `UserManager` (extends [Manager](#manager))
   The manager of artfight users.
 ## Properties:
-- #### client `(ArtfightClient)`
+- #### client ([ArtfightClient](#artfightclient-extends-eventemitter))
   The client used to log into artfight
 ## Methods:
 - ### fetch()
   - #### params:
-    - ##### username `(String)`
+    - ##### username ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
       The username of the user you want to fetch.
-  - #### returns `(Promise<User>)`
+  - #### returns  ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[User](#user)>)
     Fetches the user with the provided username.
   - #### usage:
     ````javascript
@@ -235,24 +251,24 @@ The scrapper used to connect to Artfight and scrape data.
     console.log(user);
     ````
 - ### random()
-  - #### returns `(Promise<User>)`
+  - #### returns  ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[User](#user)>)
     Fetches a random user.
   - #### usage:
     ````javascript
     const user = await client.users.random();
     console.log(user)
     ````
-# `MemberManager` (extends `Manager`)
+# `MemberManager` (extends [Manager](#manager))
   The manager of artfight members.
 ## Properties:
-- #### client `(ArtfightClient)`
+- #### client ([ArtfightClient](#artfightclient-extends-eventemitter))
   The client used to log into artfight
 ## Methods:
 - ### fetch()
   - #### params:
-    - ##### limit `(Number)`
+    - ##### limit ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
       Maxium amount of members returned.
-  - #### returns `(Promise<Member[]>)`
+  - #### returns ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<[Member](#member)[]>)
     Fetches artfight members up to a provided limit.
   - #### usage:
     ````javascript
@@ -262,28 +278,28 @@ The scrapper used to connect to Artfight and scrape data.
 # `Member`
   The member of artfight (a user who supports artfight financially).
 ## Properties:
-- #### username `(String)`
+- #### username ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   The username of the member.
-- #### lastseen `(String)`
+- #### lastseen ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   Timestamp of when the member was last seen online.
-- #### points `(Number)`
+- #### points ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
   The number of points aquired by the member in his last event.
-- #### battleratio `(Number)`
+- #### battleratio ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
   Number between `0` and `100` which shows the response rate of the member to attacks.
-# `SumbitionManager` (extends `Manager`)
+# `SumbitionManager` (extends [Manager](#manager))
   *In development*
   The manager of artfights submitions (attacks and defenses).
 ## Properties:
-- #### type `("attack"|"defense")`
+- #### type (["attack"](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org")|["defense"](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   The managers type, determines whether it stores attacks or defenses.
-# `CharacterManager` (extends `Manager`)
+# `CharacterManager` (extends [Manager](#manager))
   The manager of artfights characters
 ## Methods:
 - ### fetch()
   - #### params:
-    - ##### username `(String)`
+    - ##### username ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
       The username of the user whose characters you want to fetch
-  - #### returns `(Promise<Character[]>)`
+  - #### returns ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[Character](#character)[]>)
   Fetches all characters owned by the user with the provided username.
   - #### usage:
     ````javascript
@@ -291,7 +307,7 @@ The scrapper used to connect to Artfight and scrape data.
     console.log(characters)
     ````
 - ### random()
-  - #### returns `(Promise<Character>)`
+  - #### returns ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[Character](#character)[]>)
   Fetches a random character.
   - #### usage:
     ````javascript
@@ -300,50 +316,50 @@ The scrapper used to connect to Artfight and scrape data.
     ````
 - ### tagSearch()
   - #### params:
-    - ##### tags `(String,String[])`
+    - ##### tags ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"),[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org")[])
       Tags to filter the characters by.
-    - ##### limit `(Number)`
+    - ##### limit ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
       Maximum amount of characters returned.
-  - #### returns `(Promise<Character[]>)`
+  - #### returns ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[Character](#character)[]>)
   Returns an array of characters with the given tags and limited in length by the given limit.
 # `Character`
   An artfight character.
 ## Properties:
-- #### id `(String)`
+- #### id ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   Identification index of the character.
-- #### name `(String)`
+- #### name ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   Name of the character.
-- #### created `(String)`
+- #### created ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   Timestamp of when the character got uploaded to artfight.
-- #### images `(String[])`
+- #### images ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org")[])
   List of URLs to images of the character.
-- #### description `(String)`
+- #### description ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   Description of the character
-- #### permissions `(String)`
+- #### permissions ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   Permissions of the character (what the owner allows to do with the character).
-- #### attacks `(Sumbition[])`
+- #### attacks ([Submition](#sumbition)[])
   List of attacks made on the character.
-- #### information `(CharacterInformation)`
+- #### information ([CharacterInformation](#characterinformation))
   Information abount the character (who owns it/who designed it).
-- #### tags `(String[])`
+- #### tags ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org")[])
   Tags the character is associated with.
-- #### comments `(Comment[])`
-  *In development*
+- #### comments ([Comment](#comment)[])
   Comments made on the character.
 ## Methods:
 - ### link()
-  - #### returns `(String)`
+  - #### returns ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   The URL to the characters page on artfight.
 # `CharacterInformation`
   Information about a character.
 ## Properties:
-- #### owner `(String)`
+- #### owner ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   Owner of the character.
-- #### designer `(String)`
+- #### designer ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   Designer of the character.
-- #### *moreinfo* `(String|undefined)`
+- #### *moreinfo* ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org")|[undefined](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined))
   Link to an external site for more character information.
-# `Complete` ! Not implemented
+# `Complete`
+  *__!Not implemented!__*
   The opposite of partials, defines which returned values are returned whole. (Characters, Comments, Users, Submissions, All)
 ## Values:
 - #### Character `(1)`
@@ -356,7 +372,7 @@ The scrapper used to connect to Artfight and scrape data.
   When fetching submitions, fetch all the possible data.
 - #### All `(5)`
   When fetching everything, fetch all the possible data.
-# PageManager
+# `PageManager`
 A manager for the scappers pages
 ## Properties:
 - #### length ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
@@ -368,58 +384,106 @@ A manager for the scappers pages
     The browser to create the pages in.
   - #### returns ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<void>)
     Initializes the page manager.
-# Sumbition
+# `Sumbition`
 An artfight submition.
 ## Properties:
-- #### information (SubmitionInformation)
+- #### information ([SubmitionInformation](#submitioninformation))
   Information about the submition.
-- #### statistics (SubmitionStatistics)
+- #### statistics ([SubmitionStatistics](#submitionstatistics))
   The statistics of the submition.
-- #### revenge ({previous?:Revenge|undefined, next?:Revenge|undefined"})
+- #### revenge ({previous?:[Revenge](#revenge)|[undefined](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined), next?:[Revenge](#revenge)|[undefined](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)})
   Submition's revenge information.
-- #### timestamp (String)
+- #### timestamp ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   Timestamp of when the submition got posted.
-- #### polished (Boolean)
+- #### polished ([Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean))
   Whether the submition is marked polished.
-- #### friendlyfire (Boolean)
+- #### friendlyfire ([Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean))
   Whether the submition was sent from someone on the same team.
-- #### comments (Comment[])
+- #### comments ([Comment](#comment)[])
   Comments made on the submition.
-# SubmitionInformation
+# `SubmitionInformation`
   Information about a submition.
 ## Properties:
-  - #### from (String)
+  - #### from ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
     The username of the user that posted the submiton.
-  - #### to (String)
+  - #### to ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
     The username of the user that the submition was made for.
-  - #### team (String)
+  - #### team ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
     The name of the team of the user posting.
-  - #### characters (SubmitonCharacter[])
+  - #### characters ([SubmitonCharacter](#submitioncharacter)[])
     List of characters in the submition.
-# SubmitionCharacter
+# `SubmitionCharacter`
   A character in the submition.
 ## Properties:
-- #### type (String)
+- #### type ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   The state of the character in the submition (Head shot/Fullbody, ect.)
-- #### link (String)
+- #### link ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   Link to the character's page.
-- #### image (String)
+- #### image ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   Not sure, added it really long ago and can't figure it out.
-# SubmitionStatistics
+# `SubmitionStatistics`
 *In development*
 Statistics of a submition.
 ## Properties:
-- #### points (Number)
+- #### points ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
   Number of points awarded for the submition.
-- #### character_count (Number)
+- #### character_count ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
   Amount of characters in the submition.
-- #### type (String)
+- #### type ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   The type of submition (Drawing/Animation, ect.)
-- #### finish (String)
+- #### finish ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   The point of finish of the drawing
-- #### color (String)
+- #### color ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   The point of coloring of the drawing
-- #### shading
+- #### shading ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   The point of shading of the drawing
-- #### background
+- #### background ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   The state of background of the drawing
+# `Comment`
+*__!Not implemented!__*
+A user's comment.
+## Properties:
+- #### author ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
+  The author of the comment
+- #### content ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
+  The content of the comment
+- #### posted ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
+  The timestamp of when the comment was posted
+# BattleStatistics
+  The battle statistics of a user.
+## Properties:
+- #### ratio ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
+  The defense to attack ratio of the user.
+- #### points ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
+  Amount of points gained by the user.
+- #### attacks ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
+  Amount of attacks submited by the user.
+- #### friendlyfire ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
+  Amount of friendly fire attacks submited by the user.
+- #### defenses ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
+  Amount of defenses submited by the user.
+# `Manager`
+A cache manager.
+## Properties:
+- #### cache ([Cache](#cache-extends-nodecache))
+  The managers cache.
+# `Cache` (extends [NodeCache](https://www.npmjs.com/package/node-cache#examples))
+Storage for fetched data.
+## Properties:
+- #### size ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
+  Size of the cache.
+## Methods:
+- ### values()
+  - #### returns ([KeyValuePair](https://www.google.com/search?q=key+value+pair))
+  Returns all of the cache's values along with the coresponding keys.
+# `Revenge`
+A revenge to a submition.
+## Properties:
+- #### link ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
+  Link to the revenge submition.
+- #### title ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
+  Title of the revenge submition.
+- #### level ([Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number))
+  Level of the revenge chain.
+- #### image ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
+  Link to the revenge's image.
