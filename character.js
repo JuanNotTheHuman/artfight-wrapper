@@ -112,15 +112,14 @@ class CharacterManager extends Manager{
         this.#scrapper=scrapper;
     }
     /**
-     * 
-     * @param {String} username Name of the user
-     * @returns {Character[]}
+     * @param {String} username
+     * @returns {Promise<Character[]>}
      */
     async fetch(username){
         return await this.#scrapper.fetchUserCharacters(username);
     }
     /**
-     * @returns {Character} 
+     * @returns {Promise<Character>} 
      */
     async random(){
         return await this.#scrapper.fetchRandomCharacter();

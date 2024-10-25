@@ -4,7 +4,7 @@ const {Cache} = require("./manager")
 const {ArtfightScrapper} = require("./scrapper");
 const { CharacterManager } = require("./character");
 const {EventEmitter} = require("events");
-const { Complete } = require("./partials");
+const { Complete } = require("./complete");
 class ArtfightClient extends EventEmitter{
     /**
      * @type {ArtfightScrapper}
@@ -53,7 +53,9 @@ class ArtfightClient extends EventEmitter{
         this.members=new MemberManager(this.scrapper,new Cache(),this);
         this.user = await new ClientUser(this,username).init();
         this.completes=completes;
-        callback();
+        if(callback!=undefined){
+            callback()
+        }
     }
 }
 module.exports={ArtfightClient}

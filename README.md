@@ -10,6 +10,7 @@ I won't add a option to submit an attack via code ever
 - Check individual js files to see what needs to be added
 - Bookmarks
 - Expand the client user
+- Client events
 # Used packages:
 - [node-cache](https://www.npmjs.com/package/node-cache)
 - [puppeteer](https://www.npmjs.com/package/puppeteer)

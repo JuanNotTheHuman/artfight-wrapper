@@ -160,7 +160,7 @@ class ArtfightScrapper{
     }
     /**
      * @param {String} username Name of the user 
-     * @returns {Character[]} Array of characters owned by the user 
+     * @returns {Promise<Character[]>} Array of characters owned by the user 
      */
     async fetchUserCharacters(username){
         let pg = await this.pages.get();

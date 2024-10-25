@@ -206,7 +206,6 @@ class UserManager extends Manager{
         this.client=client;
     }
     /**
-     * @param {Page} page 
      * @param {String} username 
      * @returns {Promise<User>}
      */
@@ -228,9 +227,30 @@ class UserManager extends Manager{
         await manager.execute();
         return user;
     }
+    /**
+     * @returns {Promise<User}
+     */
     async random(){
         return await this.fetch(await this.#scrapper.fetchRandomUsername());    
     }
+}
+class Member{
+    /**
+     * @type {String}
+     */
+    username;
+    /**
+     * @type {String}
+     */
+    lastseen;
+    /**
+     * @type {Number}
+     */
+    points;
+    /**
+     * @type {Number}
+     */
+    battleratio;
 }
 class MemberManager extends Manager{
     /**
@@ -241,23 +261,20 @@ class MemberManager extends Manager{
      * @type {ArtfightScrapper}
      */
     #scrapper;
-    /**
-     * @type {Number}
-     */
-    #current_index;
     constructor(scrapper,cache,client){
         super(cache);
         this.#scrapper=scrapper;
         this.client=client;
     }
     /**
-     * @param {Number} limit 
+     * @param {Number} limit
+     * @returns {Promise<Member[]>} 
      */
     async fetch(limit){
        return await this.#scrapper.fetchMembers(limit);
     }
 }
-module.exports={User,UserManager,ClientUser,UserStatus,MemberManager}
+module.exports={User,UserManager,ClientUser,UserStatus,MemberManager,Member}
 /**
  * TODO:
  * Expand ClientUser
