@@ -208,6 +208,14 @@ class SubmitionManager extends Manager{
         this.#scrapper=scrapper;
         this.type = type;
     }
+    /**
+     * @param {String} username 
+     * @param {number} limit 
+     * @returns {Promise<Submition[]>}
+     */
+    async fetch(username,limit=0){
+        return await this.#scrapper.fetchSubmitions(username,limit,this.type);
+    }
 }
 module.exports={Submition,Revenge,SubmitionManager,SubmitionInformation,SubmitionStatistics,SubmitionCharacter}
 /**

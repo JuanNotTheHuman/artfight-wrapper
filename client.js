@@ -9,7 +9,7 @@ class ArtfightClient extends EventEmitter{
     /**
      * @type {ArtfightScrapper}
      */
-    scrapper = new ArtfightScrapper();
+    scrapper = new ArtfightScrapper(this);
     /**
      * @type {ClientUser}
      */

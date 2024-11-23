@@ -23,7 +23,3 @@ class Comment{
     }
 }
 module.exports={Comment}
-/**
- * TODO:
- * Implement complete
- */

@@ -53,7 +53,7 @@ class Character{
      * @param {Submition[]} attacks 
      * @param {CharacterInformation} information 
      * @param {String[]} tags 
-     * @param {Comment[]} comments TBA
+     * @param {Comment[]} comments
      */
     constructor(id,name,created,images,description,permissions,attacks,information,tags,comments){
         this.id=id;
@@ -65,6 +65,7 @@ class Character{
         this.attacks=attacks;
         this.information=information;
         this.tags=tags;
+        this.comments=comments;
     }
     /**
      * @returns {String} Link to the character

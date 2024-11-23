@@ -143,7 +143,7 @@ class User{
     /**
      * @type {String}
      */
-    image;
+    avatar;
     /**
      * @type {Comment[]}
      */
@@ -159,7 +159,6 @@ class User{
         this.attacks=this.client.attacks;
         this.defenses=this.client.defenses;
         this.characters = this.client.characters;
-        //Need to add comments
     }
 }
 class ClientUser extends User{
@@ -216,12 +215,18 @@ class UserManager extends Manager{
           user.status=new UserStatus(...Object.values(await this.#scrapper.fetchUserStatus(username)));
           r();
         }),new Promise(async r=>{
-            user.image=await this.#scrapper.fetchUserImage(username);
+            user.avatar=await this.#scrapper.fetchUserImage(username);
             r();
         }),new Promise(async r=>{
             let [current,overall,achivements] = await Object.values(await this.#scrapper.fetchUserStatistics(username));
-            let ov = new BattleStatistics(...overall);
             user.statistics=new UserStatistics(new BattleStatistics(...overall),new BattleStatistics(...current),achivements.map(r=>r[1]));
+            r();
+        }),new Promise(async r=>{
+            let pg=await this.#scrapper.pages.get();
+            await pg.page.goto(`https://artfight.net/~${username}`)
+            let comments = await this.#scrapper.fetchComments(pg.page)
+            user.comments=comments;
+            this.#scrapper.pages.return(pg.index);
             r();
         }));
         await manager.execute();

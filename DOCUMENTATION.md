@@ -45,6 +45,8 @@ The client used to connect to Artfight.
 The scrapper used to connect to Artfight and scrape data.
 
 ## Properties:
+- #### client ([ArtfightClient](#artfightclient-extends-eventemitter))
+  The scrapper's client.
 - #### pages ([PageManager](#pagemanager))
   The manager for handling multiple browser pages during scraping.
 
@@ -187,6 +189,12 @@ The scrapper used to connect to Artfight and scrape data.
       const randomCharacter = await scrapper.fetchRandomCharacter();
       console.log(randomCharacter);
       ```
+
+- ### fetchComment()
+  - #### params:
+    - ##### page ([Page](https://pptr.dev/api/puppeteer.page))
+    The page to scrape the comments off of.
+  - #### returns: ([Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[Comment](#comment)[]>)
 # `User`
   An artfight user.
 ## Properties:
@@ -204,10 +212,13 @@ The scrapper used to connect to Artfight and scrape data.
   The manager of the users characters.
 - #### statistics ([UserStatistics](#userstatistics))
   The statistics of the user.
-- #### image ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
+- #### avatar ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   The URL to the users avatar.
 - #### comments ([Comment](#comment)[])
   The comments made on the users page.
+    ```diff
+    - Warning: Will return empty array unless the completes: Complete.Comment or Complete.All is enabled.
+    ```
 # `UserStatus`
   The user's status
 ## Properties:
@@ -345,6 +356,9 @@ The scrapper used to connect to Artfight and scrape data.
   Tags the character is associated with.
 - #### comments ([Comment](#comment)[])
   Comments made on the character.
+  ```diff
+  - Warning: Will return empty array unless the completes: Complete.Comment or Complete.All is enabled.
+  ```
 ## Methods:
 - ### link()
   - #### returns ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
@@ -401,6 +415,9 @@ An artfight submition.
   Whether the submition was sent from someone on the same team.
 - #### comments ([Comment](#comment)[])
   Comments made on the submition.
+    ```diff
+    - Warning: Will return empty array unless the completes: Complete.Comment or Complete.All is enabled.
+    ```
 # `SubmitionInformation`
   Information about a submition.
 ## Properties:
@@ -440,7 +457,7 @@ Statistics of a submition.
 - #### background ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))
   The state of background of the drawing
 # `Comment`
-*__!Not implemented!__*
+*__!Partially implemented!__*
 A user's comment.
 ## Properties:
 - #### author ([String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String "Go to developer.mozilla.org"))

@@ -1,8 +1,16 @@
-class Complete{
-    Character=1;
-    Comment=2;
-    User=3
-    Submitions=4;
-    All=5;
-}
-module.exports={Complete}
+/**
+ * @enum {number}
+ */
+var Complete = {
+    /**@type {number} */
+    Character: 1,
+    /** @type {number} */
+    Comment: 2,
+    /** @type {number} */
+    User: 3,
+    /** @type {number} */
+    Submitions: 4,
+    /** @type {number} */
+    All: 5
+};
+module.exports = { Complete };

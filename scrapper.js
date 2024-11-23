@@ -1,12 +1,25 @@
 const { default: puppeteer} = require("puppeteer");
 const { PageManager, TaskManager } = require("./task");
 const { Submition, SubmitionInformation, SubmitionStatistics } = require("./sumbition");
+const {Member} = require("./user")
+const {Complete} = require("./complete")
 const { Page } = require("puppeteer");
+const { ArtfightClient } = require("./client");
 class ArtfightScrapper{
+    /**
+     * @type {ArtfightClient}
+     */
+    client;
     /**
      * @type {PageManager} Scrapper pages
      */
     pages;
+    /**
+     * @param {ArtfightClient} client 
+     */
+    constructor(client){
+        this.client=client;
+    }
     /**
      * @param {String} username Artfight username
      * @param {String} password Artfight password
@@ -41,7 +54,7 @@ class ArtfightScrapper{
 
     }
     /**
-     * @description Logs out the user
+     * @returns {Promise<void>}
      */
     async logout(){
         this.browser.close();
@@ -62,7 +75,7 @@ class ArtfightScrapper{
     }
     /**
      * @param {String} username
-     * @returns {String} Link of the users image
+     * @returns {Promise<String>} Link of the users image
      */
     async fetchUserImage(username){
         let pg = await this.pages.get();
@@ -76,9 +89,10 @@ class ArtfightScrapper{
     /**
      * @param {String|String[]} tags Tags for the character search
      * @param {Number} limit Maximum amount of characters returned
-     * @returns {Character[]} Array of characters with the given tags
+     * @returns {Promise<Character[]>} Array of characters with the given tags
      */
     async fetchCharactersByTag(tags,limit=10){
+        if(typeof(tags)=="string")tags=[tags];
         let pg = await this.pages.get();
         let page = pg.page;
         let index = pg.index;
@@ -117,7 +131,7 @@ class ArtfightScrapper{
     }
     /**
      * @param {String} username Name of the user 
-     * @returns {{current:Array<String|Number>,overall:String[],achivements:Array<Array<String>>}} User statistics (overall, current and achivements)
+     * @returns {Promise<{current:Array<String|Number>,overall:String[],achivements:String[][]}>} User statistics (overall, current and achivements)
      */
     async fetchUserStatistics(username){
         let pg = await this.pages.get();
@@ -127,7 +141,7 @@ class ArtfightScrapper{
         let result = await page.evaluate(async()=>{
             let arr = Array.from(document.querySelectorAll("table.table")).map(table => {
                 /**
-                 * @type {Array<Array<String>>}
+                 * @type {String[][]}
                  */
                 let rows = table.innerText.split(/[\n]/gm);
                 return rows.reduce((result, row, index) => {
@@ -142,7 +156,7 @@ class ArtfightScrapper{
                 }, []);
             });
             /**
-             * @type {Array<[String,String]>}
+             * @type {[String,String][]}
              */
             let achv;
             arr = arr.map(r => r.filter(r1 => r1).map(r1 => r1.split(":")[1]));
@@ -151,7 +165,7 @@ class ArtfightScrapper{
                     // hella wierd, it has to wait 1ms
                     achv = Array.from(document.querySelectorAll(".row")[1].children).map(r=>r.children.item(0).children.item(0)).map(r=>([r.src,r.dataset.originalTitle]));
                     r();
-                },1)
+                },10)
             })
             return {current:arr[1].map((value,index)=>index==0?value:parseFloat(value)),overall:arr[0].map(r=>parseFloat(r)),achivements:achv};
         })
@@ -186,10 +200,10 @@ class ArtfightScrapper{
     }
     /**
      * @param {String} link Link of the character
-     * @returns {Character} Character scraped from the page provided by the link
+     * @returns {Promise<Character>} Character scraped from the page provided by the link
      */
     async fetchUserCharacter(link){
-        const {Character, CharacterInformation, Character, Character} = require("./character")
+        const {Character, CharacterInformation} = require("./character")
         let pg = await this.pages.get();
         let page = pg.page;
         let index = pg.index;
@@ -213,11 +227,15 @@ class ArtfightScrapper{
         let tags = await (await page.evaluate(()=>{
             return Array.from(document.querySelectorAll(".btn.badge.badge-info.fa-1x.mt-1")).map(r=>r.textContent);
         }))
+        let comments = [Complete.All,Complete.Comment].includes(this.client.completes)?await this.fetchComments(page):[];
         this.pages.return(index);
-        return new Character(x[0],x[1],created,images,description,"WIP",attacks,new CharacterInformation(...information),tags);
+        return new Character(x[0],x[1],created,images,description,"WIP",attacks,new CharacterInformation(...information),tags,comments);
     }
-    /**`
+    /**
      * @param {Page} page 
+     * @param {String} id
+     * @param {String} name
+     * @returns {Promise<Submition[]>}
      */
     async fetchUserCharacterAttacks(page,id,name){
         await page.goto(`https://artfight.net/character/attacks/${id}.${name}`)
@@ -258,21 +276,21 @@ class ArtfightScrapper{
         }
     }
     /**
-     * URGENT NEED TO UPDATE, COZ THERES NOTHING LIKE this.type
      * @param {String} username 
      * @param {Number} limit
+     * @param {"attack"|"defense"} type
      * @returns {Promise<Submition[]>}
      */
-    async fetchSubmitions(username,limit=0){
+    async fetchSubmitions(username,limit=0,type){
         let pg = await this.pages.get();
         let page=pg.page;
         let index = pg.index;
-        await page.goto(`https://artfight.net/~${username}/${this.type}s/`)
+        await page.goto(`https://artfight.net/~${username}/${type}s/`)
         let list = [];
             const manager = new TaskManager();
             for(let index=0;index<Math.ceil(limit/30);index++){
                 let navigation = page.waitForNavigation();
-                await page.goto(`https://artfight.net/~${username}/${this.type}s?page=${index+1}`);
+                await page.goto(`https://artfight.net/~${username}/${type}s?page=${index+1}`);
                 await navigation;
                 let submitions = await (await page.waitForSelector(`.profile-${this.type}s-body`)).evaluate(r=>Array.from(Array.from(r.children)[0].children).map(r=>{
                     /**
@@ -304,6 +322,7 @@ class ArtfightScrapper{
      * @returns {Promise<Submition>}
      */
     async #fetchSumbition(page,link){
+        // Completes implementation needed
         await page.goto(link);
         await page.waitForSelector(".profile-normal-header");
         let result = await page.evaluate(()=>{
@@ -373,6 +392,10 @@ class ArtfightScrapper{
         let revenge = result[2];
         return new Submition(new SubmitionInformation(...information),new SubmitionStatistics(...statistics),revenge,time,statistics[0].includes("Friendly Fire"),"WIP",polished)
     }
+    /**
+     * @param {Number} limit 
+     * @returns {Promise<Member[]>}
+     */
     async fetchMembers(limit=19){
         //Add mutli page support
         let pg = await this.pages.get();
@@ -390,6 +413,9 @@ class ArtfightScrapper{
         this.pages.return(index);
         return list;
     }
+    /**
+     * @returns {Promise<String>}
+     */
     async fetchRandomUsername(){
         let pg = await this.pages.get();
         let page = pg.page;
@@ -400,6 +426,9 @@ class ArtfightScrapper{
         this.pages.return(index);
         return username;
     }
+    /**
+     * @returns {Promise<Character>}
+     */
     async fetchRandomCharacter(){
         let pg = await this.pages.get();
         let page = pg.page;
@@ -409,6 +438,24 @@ class ArtfightScrapper{
         let character = this.fetchUserCharacter(page.url());
         this.pages.return(index);
         return character;
+    }
+    /**
+     * @param {Page} page 
+     * @returns {Promise<Comment[]>}
+     */
+    async fetchComments(page){
+        if(![Complete.All,Complete.Comment].includes(this.client.completes)){
+            throw new Error("Unable to fetch comments: Complete.Comment permission is not enabled");
+        }
+        return await page.evaluate(()=>{
+            return Array.from(document.querySelectorAll(".comment")).map(r=>{
+                let author = r.children.item(0).textContent.replaceAll("\n","").trim();
+                let content = r.children.item(1).children.item(0).children.item(1).innerHTML;
+                let posted = r.children.item(1).children.item(0).children.item(2).querySelector(".timestamp").textContent;
+                return {author,content,posted};
+            })
+
+        })
     }
 }
 module.exports={ArtfightScrapper};
