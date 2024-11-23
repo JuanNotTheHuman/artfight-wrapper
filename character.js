@@ -137,6 +137,5 @@ class CharacterManager extends Manager{
 module.exports={CharacterManager, Character, CharacterInformation};
 /**
  * TODO:
- * Make the actual manager
  * Implement complete
  */

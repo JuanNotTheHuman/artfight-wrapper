@@ -36,7 +36,6 @@ class ArtfightScrapper{
         let pg = await this.pages.get();
         let page = pg.page;
         let index = pg.index;
-        try{
             await page.goto("https://artfight.net/login");
             await page.setViewport({width:1080,height:1024});
             await page.waitForSelector("input[name=username]");
@@ -46,12 +45,12 @@ class ArtfightScrapper{
             await page.$eval("input[type=submit]",el=>el.click());
             await redirect;
             this.pages.return(index);
+            let error = await page.$$(".alert-danger")
+            if(error.length>0){
+                await page.screenshot({path:"./images/error.png"})
+                throw new Error("Invalid login credentials");
+            }
             return;
-        }catch(e){
-            console.log(e);
-            await page.screenshot({path:"./images/error.png"})
-        }
-
     }
     /**
      * @returns {Promise<void>}
@@ -227,9 +226,12 @@ class ArtfightScrapper{
         let tags = await (await page.evaluate(()=>{
             return Array.from(document.querySelectorAll(".btn.badge.badge-info.fa-1x.mt-1")).map(r=>r.textContent);
         }))
+        let permissions = await page.evaluate(()=>{
+            return document.querySelector(".table.table-card tbody").textContent.replaceAll("  ","").replaceAll("\n"," ")
+        })
         let comments = [Complete.All,Complete.Comment].includes(this.client.completes)?await this.fetchComments(page):[];
         this.pages.return(index);
-        return new Character(x[0],x[1],created,images,description,"WIP",attacks,new CharacterInformation(...information),tags,comments);
+        return new Character(x[0],x[1],created,images,description,permissions,attacks,new CharacterInformation(...information),tags,comments);
     }
     /**
      * @param {Page} page 
@@ -244,10 +246,8 @@ class ArtfightScrapper{
             let attacks;
             if(element.length>1){
                 let links = await (await page.waitForSelector(".row"))?.evaluate(r=>{
-                    console.log("1")
                     let atks = Array.from(r?.children)
                     if(atks.length>0){
-                        console.log("2")
                         atks = atks.map(r=>r?.children?.item(0).children?.item(0).children?.item(0)?.href)
                     }else{
                         atks = []
@@ -277,11 +277,11 @@ class ArtfightScrapper{
     }
     /**
      * @param {String} username 
-     * @param {Number} limit
-     * @param {"attack"|"defense"} type
+     * @param {Number} limit Limit of submitions fetched (5 default)
+     * @param {"attack"|"defense"} type Submition type
      * @returns {Promise<Submition[]>}
      */
-    async fetchSubmitions(username,limit=0,type){
+    async fetchSubmitions(username,limit=5,type){
         let pg = await this.pages.get();
         let page=pg.page;
         let index = pg.index;
@@ -292,7 +292,7 @@ class ArtfightScrapper{
                 let navigation = page.waitForNavigation();
                 await page.goto(`https://artfight.net/~${username}/${type}s?page=${index+1}`);
                 await navigation;
-                let submitions = await (await page.waitForSelector(`.profile-${this.type}s-body`)).evaluate(r=>Array.from(Array.from(r.children)[0].children).map(r=>{
+                let submitions = await (await page.waitForSelector(`.profile-${type}s-body`)).evaluate(r=>Array.from(Array.from(r.children)[0].children).map(r=>{
                     /**
                      * @type {{link:String,image:String,title:String}}
                      */
@@ -390,7 +390,7 @@ class ArtfightScrapper{
         let information = result[0];
         let statistics = result[1];
         let revenge = result[2];
-        return new Submition(new SubmitionInformation(...information),new SubmitionStatistics(...statistics),revenge,time,statistics[0].includes("Friendly Fire"),"WIP",polished)
+        return new Submition(new SubmitionInformation(...information),new SubmitionStatistics(...statistics),revenge,time,statistics[0].includes("Friendly Fire"),undefined,polished)
     }
     /**
      * @param {Number} limit 
@@ -445,7 +445,7 @@ class ArtfightScrapper{
      */
     async fetchComments(page){
         if(![Complete.All,Complete.Comment].includes(this.client.completes)){
-            throw new Error("Unable to fetch comments: Complete.Comment permission is not enabled");
+            return []
         }
         return await page.evaluate(()=>{
             return Array.from(document.querySelectorAll(".comment")).map(r=>{

@@ -120,7 +120,7 @@ class Submition{
      * @param {Boolean} friendlyfire
      * @param {{movement_amount:String,technique:String}} animation TBA
      * @param {Boolean} polished
-     * @param {Comment[]} comments TBA
+     * @param {Comment[]} comments
      */
     constructor(information,statistics,revenge,timestamp,friendlyfire,animation,polished,comments){
         this.information=information;
@@ -213,7 +213,7 @@ class SubmitionManager extends Manager{
      * @param {number} limit 
      * @returns {Promise<Submition[]>}
      */
-    async fetch(username,limit=0){
+    async fetch(username,limit=5){
         return await this.#scrapper.fetchSubmitions(username,limit,this.type);
     }
 }
@@ -221,7 +221,6 @@ module.exports={Submition,Revenge,SubmitionManager,SubmitionInformation,Submitio
 /**
  * TODO:
  * Impletent complete
- * Fix Sumbition type
  * TBA - To be added
  * More...
  */
