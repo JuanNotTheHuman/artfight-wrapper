@@ -1,5 +1,5 @@
 # Artfight
-Artfight is an annual art trading competition, to see more [Click here](https://artfight.net)
+Artfight is an annual art trading competition, to see more [Click here](https://artfight.net)<br>
 This repository isn't in any way affiliated with artfight and is simply a fanmade project.
 # Contribute
 Feel free to suggest changes/code them yourself, if i think the code makes something more efficient or adds a useful feature, then i'll surely add it.
