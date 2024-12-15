@@ -21,6 +21,17 @@ class Cache extends NodeCache{
   values(){
     return Object.values(this.mget(this.keys()));
   }
+  /**
+   * 
+   * @param {String} key The key to cache
+   * @param {any[]|any} values values to be added to the key
+   */
+  add(key,values){
+    if(!(values instanceof Array)){
+      values=[values]
+    }
+    this.set(key,this.get(key).push(...values))
+  }
 }
 class CacheItem{
   /**
