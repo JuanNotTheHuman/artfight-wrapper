@@ -214,7 +214,21 @@ class SubmitionManager extends Manager{
      * @returns {Promise<Submition[]>}
      */
     async fetch(username,limit=5){
-        return await this.#scrapper.fetchSubmitions(username,limit,this.type);
+        let submitions = await this.#scrapper.fetchSubmitions(username,limit,this.type);
+        for(let submition of submitions){
+            if(this.type=="attack"){
+                if(!this.#scrapper.client.attacks.cache.get(username).has(submition)){
+                    let arr = this.#scrapper.client.attacks.cache.get(username).push(submition);
+                    this.#scrapper.client.attacks.cache.set(username,arr)
+                }
+            }else{
+                if(!this.#scrapper.client.defenses.cache.get(username).has(submition)){
+                    let arr = this.#scrapper.client.defenses.cache.get(username).push(submition);
+                    this.#scrapper.client.defenses.cache.set(username,arr)
+                }
+            }
+        }
+        return submitions
     }
 }
 module.exports={Submition,Revenge,SubmitionManager,SubmitionInformation,SubmitionStatistics,SubmitionCharacter}

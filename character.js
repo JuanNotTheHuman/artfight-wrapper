@@ -32,7 +32,7 @@ class Character{
      */
     attacks;
     /**
-     * @type {CharacterInformation}
+     * @type {CharacterInformation} The character's information
      */
     information;
     /**
@@ -44,16 +44,16 @@ class Character{
      */
     comments; 
     /**
-     * @param {String} id 
-     * @param {String} name 
-     * @param {String} created 
-     * @param {String[]} images 
-     * @param {String} description 
-     * @param {String} permissions 
-     * @param {Submition[]} attacks 
-     * @param {CharacterInformation} information 
-     * @param {String[]} tags 
-     * @param {Comment[]} comments
+     * @param {String} id Identification index of the character
+     * @param {String} name Name of the character
+     * @param {String} created Timestamp of when the character got uploaded
+     * @param {String[]} images Links to images of the character
+     * @param {String} description Description of the character
+     * @param {String} permissions Character permissions
+     * @param {Submition[]} attacks Attacks made on the character
+     * @param {CharacterInformation} information The character's information
+     * @param {String[]} tags Character tags
+     * @param {Comment[]} comments Comments on the character
      */
     constructor(id,name,created,images,description,permissions,attacks,information,tags,comments){
         this.id=id;
@@ -74,16 +74,13 @@ class Character{
         return `https://artfight.net/character/${this.id}.${this.name}`
     }
 }
-/**
- * @classdesc Information about the character
- */
 class CharacterInformation{
     /**
-     * @type {String}
+     * @type {String} The owner's nickname
      */
     owner;
     /**
-     * @type {String}
+     * @type {String} The designer's nickname
      */
     designer;
     /**
@@ -117,13 +114,26 @@ class CharacterManager extends Manager{
      * @returns {Promise<Character[]>} All of the User's characters
      */
     async fetch(username){
-        return await this.#scrapper.fetchUserCharacters(username);
+        let characters = await this.#scrapper.fetchUserCharacters(username);
+        this.cache.set(username,characters)
+        return characters;
     }
     /**
      * @returns {Promise<Character>} A random character
      */
     async random(){
-        return await this.#scrapper.fetchRandomCharacter();
+        /**
+         * @type {Character}
+         */
+        let character = await this.#scrapper.fetchRandomCharacter();
+        if(!this.cache.get(character.information.owner).map(r=>r.name).has(character.name)){
+            /**
+             * @type {Character[]}
+             */
+            let arr = this.cache.get(character.information.owner).push(character)
+            this.cache.set(character.information.owner,arr)
+        }
+        return character;
     }
     /**
      * @param {String|String[]} tags Character tags
@@ -131,7 +141,17 @@ class CharacterManager extends Manager{
      * @returns {Character[]} Array of characters
      */
     async tagSearch(tags,limit){
-        return await this.#scrapper.fetchCharactersByTag(tags,limit);
+        let characters = await this.#scrapper.fetchCharactersByTag(tags,limit);
+        for(let character of characters){
+            if(!this.cache.get(character.information.owner).map(r=>r.name).has(character.name)){
+                /**
+                 * @type {Character[]}
+                 */
+                let arr = this.cache.get(character.information.owner).push(character)
+                this.cache.set(character.information.owner,arr)
+            }
+        }
+        return characters;
     }
 }
 module.exports={CharacterManager, Character, CharacterInformation};

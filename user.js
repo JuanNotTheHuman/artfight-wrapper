@@ -231,13 +231,20 @@ class UserManager extends Manager{
             r();
         }));
         await manager.execute();
+        if(!this.cache.has(user.username)){
+            this.cache.set(user.username,user)
+        }
         return user;
     }
     /**
      * @returns {Promise<User} A random user
      */
     async random(){
-        return await this.fetch(await this.#scrapper.fetchRandomUsername());    
+        let user = await this.fetch(await this.#scrapper.fetchRandomUsername());
+        if(!this.cache.has(user.username)){
+            this.cache.set(user.username,user);
+        }
+        return user;
     }
 }
 class Member{
@@ -283,7 +290,13 @@ class MemberManager extends Manager{
      * @returns {Promise<Member[]>} List of members
      */
     async fetch(limit){
-       return await this.#scrapper.fetchMembers(limit);
+        let members = await this.#scrapper.fetchMembers(limit);
+        for(let member of members){
+            if(!this.cache.has(member.username)){
+                this.cache.set(member.username,username);
+            }
+        }
+        return members;
     }
 }
 module.exports={User,UserManager,ClientUser,UserStatus,MemberManager,Member}
