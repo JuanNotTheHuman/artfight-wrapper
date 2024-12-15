@@ -106,7 +106,7 @@ The scrapper used to connect to Artfight and scrape data.
       Array of characters matching the specified tags.
     - #### usage:
       ```javascript
-      const characters = await scrapper.fetchCharactersByTag(['tag1', 'tag2'], 5);
+      const characters = await scrapper.fetchCharactersByTag(['tag1', 'tag2'], 2);
       console.log(characters);
       ```
 

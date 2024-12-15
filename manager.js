@@ -9,7 +9,7 @@ class Cache extends NodeCache{
   }
   /**
    * 
-   * @param {NodeCache.Options} args 
+   * @param {NodeCache.Options} args Native NodeCache options
    */
   constructor(args){
     super(args);
@@ -38,7 +38,7 @@ class Manager {
      */
     cache;
     /**
-     * @param {Cache} cacheInstance
+     * @param {Cache} cacheInstance the cache's instance
      */
     constructor(cacheInstance) {
       this.cache=cacheInstance;

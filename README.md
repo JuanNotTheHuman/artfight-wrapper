@@ -6,12 +6,11 @@ Feel free to suggest changes/code them yourself, if i think the code makes somet
 I won't add a option to submit an attack via code ever
 # To be added
 - Checking and adding if attack/defense is a animation or other than drawing
-- Check individual js files to see what needs to be added
-- Bookmarks
-- Expand the client user
+- Expand the `ClientUser`
+    - Bookmarks
 - Client events
 - Implement cache
-- More...
+- More... there's always more...
 # Documentation
 [DOCUMENTATION.md](https://github.com/JuanNotTheHuman/Artfight/blob/main/DOCUMENTATION.md)
 # Used packages:

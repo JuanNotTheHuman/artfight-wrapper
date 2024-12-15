@@ -2,15 +2,15 @@ const { Page, Browser } = require("puppeteer");
 const {maxpages} = require("./config.json")
 class TaskManager{
     /**
-     * @type {Number}
+     * @type {Number} Max amount of pages
      */
     limit;
     /**
-     * @type {Promise[]}
+     * @type {Promise[]} List of tasks to complete
      */
     tasks=[];
     /**
-     * @param {Number} limit 
+     * @param {Number} limit Max amount of pages
      */
     constructor(limit){
         if(limit!=undefined){
@@ -21,6 +21,9 @@ class TaskManager{
             this.limit=maxpages;
         }
     }
+    /**
+     * Executes all of the manager's tasks in batches
+     */
     async execute(){
         let arr = this.#chunk(this.tasks,this.limit);
         for(let i=0;i<arr.length;i++){
@@ -28,9 +31,9 @@ class TaskManager{
         }
     }
     /**
-     * @param {Array.<Promise>} arr 
-     * @param {Number} size 
-     * @returns {Array<Array<Promise>>}
+     * @param {Array.<Promise>} arr List of tasks to complete
+     * @param {Number} size Chunk size
+     * @returns {Array<Array<Promise>>} Chunked list of tasks to complete
      */
     #chunk(arr, size){
         return Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>arr.slice(i * size, i * size + size));
@@ -38,18 +41,18 @@ class TaskManager{
 }
 class PageManager {
     /**
-     * @type {Array.<{page:Page,active:Boolean,index:Number}>}
+     * @type {Array.<{page:Page,active:Boolean,index:Number}>} List of all pages managed by the manager
      */
     #pages = [];
     /**
-     * @type {Number}
+     * @type {Number} Amount of pages managed
      */
     length;
     get length(){
         return this.#pages.length;
     }
     /**
-     * @param {Browser} browser 
+     * @param {Browser} browser The browser to manage the pages in
      */
     async init(browser) {
         for (let index = 0; index < maxpages; index++) {
@@ -72,7 +75,7 @@ class PageManager {
     }
 
     /**
-     * @returns {Promise<{page:Page,active:Boolean,index:Number}>}
+     * @returns {Promise<{page:Page,active:Boolean,index:Number}>} An inactive page along with its index
      */
     async get() {
         return new Promise(resolve => {
@@ -91,8 +94,8 @@ class PageManager {
     }
 
     /**
-     * @param {Number} index
-     * @returns {void}
+     * @param {Number} index The index of the page
+     * @returns {void} Unactivates the page
      */
     return(index) {
         let page = this.#pages[index];

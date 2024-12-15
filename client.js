@@ -7,35 +7,35 @@ const {EventEmitter} = require("events");
 const { Complete } = require("./complete");
 class ArtfightClient extends EventEmitter{
     /**
-     * @type {ArtfightScrapper}
+     * @type {ArtfightScrapper} The client's scrapper
      */
     scrapper = new ArtfightScrapper(this);
     /**
-     * @type {ClientUser}
+     * @type {ClientUser} The client's user (the user that logged in via the client)
      */
     user;
     /**
-     * @type {UserManager}
+     * @type {UserManager} Artfight's users
      */
     users;
     /**
-     * @type {MemberManager}
+     * @type {MemberManager} Artfight's members
      */
     members;
     /**
-     * @type {SubmitionManager}
+     * @type {SubmitionManager} Artfight's attacks
      */
     attacks;
     /**
-     * @type {SubmitionManager}
+     * @type {SubmitionManager} Artfight's defenses
      */
     defenses;
     /**
-     * @type {CharacterManager}
+     * @type {CharacterManager} Artfight's characters
      */
     characters;
     /**
-     * @type {Complete|Complete[]}
+     * @type {Complete|Complete[]} Allowed types (made for better cpu performance), specifies which types to fetch completely.
      */
     completes;
     /**

@@ -101,26 +101,26 @@ class CharacterInformation{
 }
 class CharacterManager extends Manager{
     /**
-     * @type {ArtfightScrapper}
+     * @type {ArtfightScrapper} The manager's scrapper
      */
     #scrapper;
     /**
-     * @param {ArtfightScrapper} scrapper 
-     * @param {Cache} cache 
+     * @param {ArtfightScrapper} scrapper The manager's scrapper
+     * @param {Cache} cache The manager's cache manager
      */
     constructor(scrapper,cache){
         super(cache);
         this.#scrapper=scrapper;
     }
     /**
-     * @param {String} username
-     * @returns {Promise<Character[]>}
+     * @param {String} username The User's username
+     * @returns {Promise<Character[]>} All of the User's characters
      */
     async fetch(username){
         return await this.#scrapper.fetchUserCharacters(username);
     }
     /**
-     * @returns {Promise<Character>} 
+     * @returns {Promise<Character>} A random character
      */
     async random(){
         return await this.#scrapper.fetchRandomCharacter();
@@ -128,7 +128,7 @@ class CharacterManager extends Manager{
     /**
      * @param {String|String[]} tags Character tags
      * @param {Number} limit Maximum amount of characters returned
-     * @returns {Character[]}
+     * @returns {Character[]} Array of characters
      */
     async tagSearch(tags,limit){
         return await this.#scrapper.fetchCharactersByTag(tags,limit);
