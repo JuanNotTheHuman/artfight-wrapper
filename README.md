@@ -7,7 +7,7 @@ I won't add a option to submit an attack via code ever
 # To be added
 - Checking and adding if attack/defense is a animation or other than drawing
 - Expand the `ClientUser`
-    - Bookmarks
+    - finish implementing bookmarks
 - Client events
 - More... there's always more...
 # Documentation
