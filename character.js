@@ -4,27 +4,27 @@ const { ArtfightScrapper } = require("./scrapper");
 const {Submition} = require("./sumbition");
 class Character{
     /**
-     * @type {String} Identification index of the character
+     * @type {string} Identification index of the character
      */
     id;
     /**
-     * @type {String} Name of the character
+     * @type {string} Name of the character
      */
     name;
     /**
-     * @type {String} Timestamp of when the character got uploaded
+     * @type {string} Timestamp of when the character got uploaded
      */
     created;
     /**
-     * @type {String[]} Links to images of the character
+     * @type {string[]} Links to images of the character
      */
     images;
     /**
-     * @type {String} Description of the character
+     * @type {string} Description of the character
      */
     description;
     /**
-     * @type {String} Character permissions
+     * @type {string} Character permissions
      */
     permissions;
     /**
@@ -36,7 +36,7 @@ class Character{
      */
     information;
     /**
-     * @type {String[]} Character tags
+     * @type {string[]} Character tags
      */
     tags;
     /**
@@ -44,15 +44,15 @@ class Character{
      */
     comments; 
     /**
-     * @param {String} id Identification index of the character
-     * @param {String} name Name of the character
-     * @param {String} created Timestamp of when the character got uploaded
-     * @param {String[]} images Links to images of the character
-     * @param {String} description Description of the character
-     * @param {String} permissions Character permissions
+     * @param {string} id Identification index of the character
+     * @param {string} name Name of the character
+     * @param {string} created Timestamp of when the character got uploaded
+     * @param {string[]} images Links to images of the character
+     * @param {string} description Description of the character
+     * @param {string} permissions Character permissions
      * @param {Submition[]} attacks Attacks made on the character
      * @param {CharacterInformation} information The character's information
-     * @param {String[]} tags Character tags
+     * @param {string[]} tags Character tags
      * @param {Comment[]} comments Comments on the character
      */
     constructor(id,name,created,images,description,permissions,attacks,information,tags,comments){
@@ -68,7 +68,19 @@ class Character{
         this.comments=comments;
     }
     /**
-     * @returns {String} Link to the character
+     * To be implemented, bookmarks the character
+     */
+    async bookmark(){
+        
+    }
+    /**
+     * To be implemented, unbookmarks the character
+     */
+    async unbookmark(){
+
+    }
+    /**
+     * @returns {string} Link to the character
      */
     link(){
         return `https://artfight.net/character/${this.id}.${this.name}`
@@ -76,17 +88,17 @@ class Character{
 }
 class CharacterInformation{
     /**
-     * @type {String} The owner's nickname
+     * @type {string} The owner's nickname
      */
     owner;
     /**
-     * @type {String} The designer's nickname
+     * @type {string} The designer's nickname
      */
     designer;
     /**
-     * @param {String} owner Owner of character
-     * @param {String} designer Designer of the character
-     * @param {String} moreinfo More information about the character (link to external website)
+     * @param {string} owner Owner of character
+     * @param {string} designer Designer of the character
+     * @param {string} moreinfo More information about the character (link to external website)
      */
     constructor(owner,designer,moreinfo){
         this.owner=owner;
@@ -110,7 +122,7 @@ class CharacterManager extends Manager{
         this.#scrapper=scrapper;
     }
     /**
-     * @param {String} username The User's username
+     * @param {string} username The User's username
      * @returns {Promise<Character[]>} All of the User's characters
      */
     async fetch(username){
@@ -136,8 +148,8 @@ class CharacterManager extends Manager{
         return character;
     }
     /**
-     * @param {String|String[]} tags Character tags
-     * @param {Number} limit Maximum amount of characters returned
+     * @param {string|string[]} tags Character tags
+     * @param {number} limit Maximum amount of characters returned
      * @returns {Character[]} Array of characters
      */
     async tagSearch(tags,limit){

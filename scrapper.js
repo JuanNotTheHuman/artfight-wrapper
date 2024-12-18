@@ -15,14 +15,14 @@ class ArtfightScrapper{
      */
     pages;
     /**
-     * @param {ArtfightClient} client 
+     * @param {ArtfightClient} client The scapper's client
      */
     constructor(client){
         this.client=client;
     }
     /**
-     * @param {String} username Artfight username
-     * @param {String} password Artfight password
+     * @param {string} username Artfight username
+     * @param {string} password Artfight password
      * @returns {Promise<void>} Logs in the user
      */
     async login(username,password){
@@ -31,7 +31,7 @@ class ArtfightScrapper{
         await this.pages.init(browser);
         /**
          * @property {Page} page
-         * @property {Number} index
+         * @property {number} index
          */
         let pg = await this.pages.get();
         let page = pg.page;
@@ -53,14 +53,14 @@ class ArtfightScrapper{
             return;
     }
     /**
-     * @returns {Promise<void>}
+     * @returns {Promise<void>} Closes the browser ending the session
      */
     async logout(){
         this.browser.close();
     }
     /**
-     * @param {String} username Name of the user
-     * @returns {Promise<{lastseen:String,joined:String,team:String}} The status of the user (when was the user last online/joined/what was the users team)
+     * @param {string} username Nickname of the user
+     * @returns {Promise<{lastseen:string,joined:string,team:string}} The status of the user (when was the user last online/joined/what was the users team)
      */
     async fetchUserStatus(username){
         let pg = await this.pages.get();
@@ -73,8 +73,8 @@ class ArtfightScrapper{
         return {lastseen:children[0].split(":")[1].trim(),joined:children[1].split(":")[1].trim(),team:children[2].split(":")[1].trim()};
     }
     /**
-     * @param {String} username
-     * @returns {Promise<String>} Link of the users image
+     * @param {string} username Nickname of the user
+     * @returns {Promise<string>} Link of the users image
      */
     async fetchUserImage(username){
         let pg = await this.pages.get();
@@ -86,8 +86,8 @@ class ArtfightScrapper{
         return parent.evaluate(r=>r.getAttribute("style").split(";")[1].replace("background-image: url(","").replace(")","").split("?")[0])
     }
     /**
-     * @param {String|String[]} tags Tags for the character search
-     * @param {Number} limit Maximum amount of characters returned
+     * @param {string|string[]} tags Tags for the character search
+     * @param {number} limit Maximum amount of characters returned
      * @returns {Promise<Character[]>} Array of characters with the given tags
      */
     async fetchCharactersByTag(tags,limit=10){
@@ -129,8 +129,8 @@ class ArtfightScrapper{
         return [];
     }
     /**
-     * @param {String} username Name of the user 
-     * @returns {Promise<{current:Array<String|Number>,overall:String[],achivements:String[][]}>} User statistics (overall, current and achivements)
+     * @param {string} username Nickname of the user 
+     * @returns {Promise<{current:Array<string|number>,overall:string[],achivements:string[][]}>} User statistics (overall, current and achivements)
      */
     async fetchUserStatistics(username){
         let pg = await this.pages.get();
@@ -140,7 +140,7 @@ class ArtfightScrapper{
         let result = await page.evaluate(async()=>{
             let arr = Array.from(document.querySelectorAll("table.table")).map(table => {
                 /**
-                 * @type {String[][]}
+                 * @type {string[][]}
                  */
                 let rows = table.innerText.split(/[\n]/gm);
                 return rows.reduce((result, row, index) => {
@@ -155,13 +155,12 @@ class ArtfightScrapper{
                 }, []);
             });
             /**
-             * @type {[String,String][]}
+             * @type {[string,string][]}
              */
             let achv;
             arr = arr.map(r => r.filter(r1 => r1).map(r1 => r1.split(":")[1]));
             await new Promise(r=>{
                 setTimeout(()=>{
-                    // hella wierd, it has to wait 1ms
                     achv = Array.from(document.querySelectorAll(".row")[1].children).map(r=>r.children.item(0).children.item(0)).map(r=>([r.src,r.dataset.originalTitle]));
                     r();
                 },10)
@@ -172,7 +171,7 @@ class ArtfightScrapper{
         return result;
     }
     /**
-     * @param {String} username Name of the user 
+     * @param {string} username Nickname of the user 
      * @returns {Promise<Character[]>} Array of characters owned by the user 
      */
     async fetchUserCharacters(username){
@@ -198,7 +197,7 @@ class ArtfightScrapper{
         return list;
     }
     /**
-     * @param {String} link Link of the character
+     * @param {string} link Url to the character's page
      * @returns {Promise<Character>} Character scraped from the page provided by the link
      */
     async fetchUserCharacter(link){
@@ -234,10 +233,10 @@ class ArtfightScrapper{
         return new Character(x[0],x[1],created,images,description,permissions,attacks,new CharacterInformation(...information),tags,comments);
     }
     /**
-     * @param {Page} page 
-     * @param {String} id
-     * @param {String} name
-     * @returns {Promise<Submition[]>}
+     * @param {Page} page The browser page
+     * @param {string} id The character's id
+     * @param {string} name The character's name
+     * @returns {Promise<Submition[]>} List of attacks made on the character
      */
     async fetchUserCharacterAttacks(page,id,name){
         await page.goto(`https://artfight.net/character/attacks/${id}.${name}`)
@@ -276,10 +275,10 @@ class ArtfightScrapper{
         }
     }
     /**
-     * @param {String} username 
-     * @param {Number} limit Limit of submitions fetched (5 default)
+     * @param {string} username Nickname of the user
+     * @param {number} limit Limit of submitions fetched (5 default)
      * @param {"attack"|"defense"} type Submition type
-     * @returns {Promise<Submition[]>}
+     * @returns {Promise<Submition[]>} List of all submitions that the user has made
      */
     async fetchSubmitions(username,limit=5,type){
         let pg = await this.pages.get();
@@ -294,7 +293,7 @@ class ArtfightScrapper{
                 await navigation;
                 let submitions = await (await page.waitForSelector(`.profile-${type}s-body`)).evaluate(r=>Array.from(Array.from(r.children)[0].children).map(r=>{
                     /**
-                     * @type {{link:String,image:String,title:String}}
+                     * @type {{link:string,image:string,title:string}}
                      */
                     let data = {link:null,image:null,title:null};
                     data.link=r.children.item(0).href;
@@ -317,9 +316,9 @@ class ArtfightScrapper{
         return list;
     }
     /**
-     * @param {Page} page 
-     * @param {String} link 
-     * @returns {Promise<Submition>}
+     * @param {Page} page The browser page
+     * @param {string} link The submition's url
+     * @returns {Promise<Submition>} The submition
      */
     async #fetchSumbition(page,link){
         // Completes implementation needed
@@ -342,7 +341,7 @@ class ArtfightScrapper{
                 }
             };
             if(elements.length>2){
-                let level = Number(Array.from(document.querySelectorAll(".card-header.p-3.border.rounded.mt-3"))[0]?.textContent.replace(/[\r\n]+/gm, "").trim().replace("Revenge chain (Level: ","").replace(")",""));
+                let level = number(Array.from(document.querySelectorAll(".card-header.p-3.border.rounded.mt-3"))[0]?.textContent.replace(/[\r\n]+/gm, "").trim().replace("Revenge chain (Level: ","").replace(")",""));
                 let previous;
                 if(level!=0){
                     previous={};
@@ -393,8 +392,8 @@ class ArtfightScrapper{
         return new Submition(new SubmitionInformation(...information),new SubmitionStatistics(...statistics),revenge,time,statistics[0].includes("Friendly Fire"),undefined,polished)
     }
     /**
-     * @param {Number} limit 
-     * @returns {Promise<Member[]>}
+     * @param {number} limit Maximum amount of members returned
+     * @returns {Promise<{username:string,lastseen:string,points:number,battleratio:number}[]>} List of members
      */
     async fetchMembers(limit=19){
         //Add mutli page support
@@ -414,7 +413,7 @@ class ArtfightScrapper{
         return list;
     }
     /**
-     * @returns {Promise<String>}
+     * @returns {Promise<string>} A random Artfight username
      */
     async fetchRandomUsername(){
         let pg = await this.pages.get();
@@ -427,7 +426,7 @@ class ArtfightScrapper{
         return username;
     }
     /**
-     * @returns {Promise<Character>}
+     * @returns {Promise<Character>} A random character
      */
     async fetchRandomCharacter(){
         let pg = await this.pages.get();
@@ -440,8 +439,8 @@ class ArtfightScrapper{
         return character;
     }
     /**
-     * @param {Page} page 
-     * @returns {Promise<Comment[]>}
+     * @param {Page} page The page the comments are on
+     * @returns {Promise<{author:string,content:string,posted:string}[]>} List of comments made on the page
      */
     async fetchComments(page){
         if(![Complete.All,Complete.Comment].includes(this.client.completes)){
@@ -456,6 +455,35 @@ class ArtfightScrapper{
             })
 
         })
+    }
+    /**
+     * @param {number} limit Maximum amount of bookmarks fetched
+     * @returns {Promise<string[][]>} List of bookmark data
+     */
+    async fetchClientUserBookmarks(limit){
+        // add pages
+        let pg = await this.pages.get();
+        let page = pg.page;
+        await page.goto("https://artfight.net/manage/bookmarks");
+        let bookmarks = await page.evaluate(()=>{
+            return Array.from(document.querySelectorAll(".card.mt-2")).map(r=>{
+                let elements = Array.from(r.querySelector(".row").children)
+                let a = elements[0].querySelector(".thumbnail");
+                let adt = a.href.split("/").pop().split(".")
+                let id = adt[0]
+                let icon = a.children[0].src;
+                let bdt = elements[1].children;
+                let name=bdt[0].querySelector("i").innerText;
+                let owner = bdt[0].querySelector("strong").innerText.trim();
+                let description = bdt[1].textContent.trim();
+                let cdt = elements[2].children;
+                let updated = cdt[0].textContent.replace("Updated: ","")
+                let order = cdt[1].textContent.replace("Order: ","")
+                return [id,name,icon,owner,description,updated,order]
+            })
+        })
+        this.pages.return(pg.index);
+        return bookmarks;
     }
 }
 module.exports={ArtfightScrapper};

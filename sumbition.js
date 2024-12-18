@@ -2,15 +2,15 @@ const {ArtfightScrapper} = require("./scrapper");
 const {Manager,Cache } = require("./manager");
 class SubmitionInformation{
     /**
-     * @type {String} The user that submitted the attack
+     * @type {string} The user that submitted the attack
      */
     from;
     /**
-     * @type {String} The user the attack got submitted to
+     * @type {string} The user the attack got submitted to
      */
     to;
     /**
-     * @type {String} The attacker's team
+     * @type {string} The attacker's team
      */
     team;
     /**
@@ -19,9 +19,9 @@ class SubmitionInformation{
     characters;
     /**
      * 
-     * @param {String} from The user that submitted the attack
-     * @param {String} to The user the attack got submitted to
-     * @param {String} team The attacker's team
+     * @param {string} from The user that submitted the attack
+     * @param {string} to The user the attack got submitted to
+     * @param {string} team The attacker's team
      * @param {SubmitionCharacter[]} characters List of characters present in the attack
      */
     constructor(from,to,team,characters){
@@ -33,41 +33,41 @@ class SubmitionInformation{
 }
 class SubmitionStatistics{
     /**
-     * @type {Number} Number of points awarded for the submition
+     * @type {number} number of points awarded for the submition
      */
     points;
     /**
-     * @type {Number} Amount of characters in the submition
+     * @type {number} Amount of characters in the submition
      */
     character_count; 
     /**
-     * @type {String} The submition type
+     * @type {string} The submition type
      */
     type;
     /**
-     * @type {String} The finish state of the submition
+     * @type {string} The finish state of the submition
      */
     finish;
     /**
-     * @type {String} The coloring state of the submition
+     * @type {string} The coloring state of the submition
      */
     color;
     /**
-     * @type {String} The shading state of the submition
+     * @type {string} The shading state of the submition
      */
     shading;
     /**
-     * @type {String} The background state of the submition
+     * @type {string} The background state of the submition
      */
     background;
     /**
-     * @param {Number} points Number of points awarded for the submition
-     * @param {Number} character_count Amount of characters in the submition
-     * @param {String} type The submition type
-     * @param {String} finish The finish state of the submition
-     * @param {String} color The coloring state of the submition
-     * @param {String} shading The shading state of the submition
-     * @param {String} background The background state of the submition
+     * @param {number} points number of points awarded for the submition
+     * @param {number} character_count Amount of characters in the submition
+     * @param {string} type The submition type
+     * @param {string} finish The finish state of the submition
+     * @param {string} color The coloring state of the submition
+     * @param {string} shading The shading state of the submition
+     * @param {string} background The background state of the submition
      */
     constructor(points,character_count,type,finish,color,shading,background){
         if(typeof(points)=="string"){
@@ -97,7 +97,7 @@ class Submition{
      */
     revenge;
     /**
-     * @type {String} The timestamp of when the submition was posted
+     * @type {string} The timestamp of when the submition was posted
      */
     timestamp;
     /**
@@ -116,9 +116,9 @@ class Submition{
      * @param {SubmitionInformation} information Information about the submition
      * @param {SubmitionStatistics} statistics Submition statistics
      * @param {{previous?:Revenge,next?:Revenge}} revenge The revenges of the submition
-     * @param {String} timestamp The timestamp of when the submition was posted
+     * @param {string} timestamp The timestamp of when the submition was posted
      * @param {Boolean} friendlyfire
-     * @param {{movement_amount:String,technique:String}} animation TBA
+     * @param {{movement_amount:string,technique:string}} animation TBA
      * @param {Boolean} polished Whether the submition is polished
      * @param {Comment[]} comments The submition's comments
      */
@@ -137,26 +137,26 @@ class Submition{
 }
 class Revenge{
     /**
-     * @type {String} The revenge's link
+     * @type {string} The revenge's link
      */
     link
     /**
-     * @type {String} The revenge's title
+     * @type {string} The revenge's title
      */
     title;
     /**
-     * @type {Number} The revenge's level
+     * @type {number} The revenge's level
      */
     level;
     /**
-     * @type {String} The revenge's icon url
+     * @type {string} The revenge's icon url
      */
     image;
     /**
-     * @param {String} title The revenge's title
-     * @param {Number} level The revenge's level
-     * @param {String} image The revenge's icon url
-     * @param {String} link The revenge's link
+     * @param {string} title The revenge's title
+     * @param {number} level The revenge's level
+     * @param {string} image The revenge's icon url
+     * @param {string} link The revenge's link
      */
     constructor(title,level,image,link){
         this.title=title;
@@ -167,21 +167,21 @@ class Revenge{
 }
 class SubmitionCharacter{
     /**
-     * @type {String} Type of character features (fullbody, halfbody, ect.)
+     * @type {string} Type of character features (fullbody, halfbody, ect.)
      */
     type;
     /**
-     * @type {String} Url to the character
+     * @type {string} Url to the character
      */
     link;
     /**
-     * @type {String} Url to the character's icon
+     * @type {string} Url to the character's icon
      */
     image;
     /**
-     * @param {String} type Type of character features (fullbody, halfbody, ect.)
-     * @param {String} image Url to the character's icon
-     * @param {String} link Url to the character
+     * @param {string} type Type of character features (fullbody, halfbody, ect.)
+     * @param {string} image Url to the character's icon
+     * @param {string} link Url to the character
      */
     constructor(type,image,link){
         this.type=type;
@@ -201,7 +201,7 @@ class SubmitionManager extends Manager{
     /**
      * @param {ArtfightScrapper} scrapper The manager's scapper
      * @param {Cache} cache The manager's cache manager
-     * @param {String} type The manager's type
+     * @param {string} type The manager's type
      */
     constructor(scrapper,cache,type){
         super(cache)
@@ -209,7 +209,7 @@ class SubmitionManager extends Manager{
         this.type = type;
     }
     /**
-     * @param {String} username The user's username
+     * @param {string} username The user's username
      * @param {number} limit Max amount of submitions fetched
      * @returns {Promise<Submition[]>}
      */

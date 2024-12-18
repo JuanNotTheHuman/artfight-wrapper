@@ -1,28 +1,28 @@
-const { Page } = require("puppeteer");
 const {CharacterManager } = require("./character");
 const {TaskManager} = require("./task");
 const {SubmitionManager } = require("./sumbition");
 const { Manager, Cache } = require("./manager");
 const { ArtfightClient } = require("./client");
 const { ArtfightScrapper } = require("./scrapper");
+const {BookmarkManager} = require("./bookmark")
 class UserStatus{
     /**
-     * @type {String} The timestamp of when the user was last seen online
+     * @type {string} The timestamp of when the user was last seen online
      */
     lastseen;
     /**
-     * @type {String} The timestamp of when the user joined Artfight
+     * @type {string} The timestamp of when the user joined Artfight
      */
     joined;
     /**
-     * @type {String} The user's current team
+     * @type {string} The user's current team
      */
     team;
     /**
      * 
-     * @param {String} lastseen The timestamp of when the user was last seen online
-     * @param {String} joined The timestamp of when the user joined Artfight
-     * @param {String} team The user's current team
+     * @param {string} lastseen The timestamp of when the user was last seen online
+     * @param {string} joined The timestamp of when the user joined Artfight
+     * @param {string} team The user's current team
      */
     constructor(lastseen,joined,team){
         this.lastseen=lastseen;
@@ -32,35 +32,35 @@ class UserStatus{
 }
 class BattleStatistics{
     /**
-     * @type {Number} The attack to defense ratio of the user
+     * @type {number} The attack to defense ratio of the user
      */
     ratio;
     /**
-     * @type {Number} Amount of points accumulated by the user
+     * @type {number} Amount of points accumulated by the user
      */
     points;
     /**
-     * @type {Number} Amount of attacks done by the user
+     * @type {number} Amount of attacks done by the user
      */
     attacks;
     /**
-     * @type {Number} Amount of friendly fire attacks done by the user
+     * @type {number} Amount of friendly fire attacks done by the user
      */
     friendlyfire;
     /**
-     * @type {Number} Amount of defenses done by the user
+     * @type {number} Amount of defenses done by the user
      */
     defenses;
     /**
      * 
-     * @param {Number} ratio The attack to defense ratio of the user
-     * @param {Number} points Amount of points accumulated by the user
-     * @param {Number} attacks Amount of attacks done by the user
-     * @param {Number} friendlyfire Amount of friendly fire attacks done by the user
-     * @param {Number} defenses Amount of defenses done by the user
-     * @param {Number?} followers Amount of followers the user has
-     * @param {Number?} following Amount of users followed by the user
-     * @param {Number?} characters Amount of characters posted by the user
+     * @param {number} ratio The attack to defense ratio of the user
+     * @param {number} points Amount of points accumulated by the user
+     * @param {number} attacks Amount of attacks done by the user
+     * @param {number} friendlyfire Amount of friendly fire attacks done by the user
+     * @param {number} defenses Amount of defenses done by the user
+     * @param {number?} followers Amount of followers the user has
+     * @param {number?} following Amount of users followed by the user
+     * @param {number?} characters Amount of characters posted by the user
      */
     constructor(ratio,points,attacks,friendlyfire,defenses,characters,followers,following){
         if(typeof(ratio)=="string"){
@@ -97,13 +97,13 @@ class UserStatistics{
      */
     current;
     /**
-     * @type {String[]} User's achivements
+     * @type {string[]} User's achivements
      */
     achivements;
     /**
      * @param {BattleStatistics} overall Overall battle statistics
      * @param {BattleStatistics} current Current battle statistics
-     * @param {String[]} achivements User's achivements
+     * @param {string[]} achivements User's achivements
      */
     constructor(overall,current,achivements){
         this.overall=overall;
@@ -117,7 +117,7 @@ class User{
      */
     client;
     /**
-     * @type {String} The user's nickname
+     * @type {string} The user's nickname
      */
     username;
     /**
@@ -141,7 +141,7 @@ class User{
      */
     statistics;
     /**
-     * @type {String} Url of the user's avatar
+     * @type {string} Url of the user's avatar
      */
     avatar;
     /**
@@ -151,7 +151,7 @@ class User{
     /**
      * 
      * @param {ArtfightClient} client The Artfight client
-     * @param {String} username The logged in user's username
+     * @param {string} username The logged in user's username
      */
     constructor(client,username){
         this.client=client;
@@ -160,11 +160,18 @@ class User{
         this.defenses=this.client.defenses;
         this.characters = this.client.characters;
     }
+    link(){
+        return `https://artfight.net/~${this.username}`
+    }
 }
 class ClientUser extends User{
     /**
+     * @type {BookmarkManager} The logged in user's bookmark manager
+     */
+    bookmarks;
+    /**
      * @param {ArtfightClient} client The Arfight client
-     * @param {String} username The logged in user's username
+     * @param {string} username The logged in user's username
      */
     constructor(client,username){
         super(client,username);
@@ -206,7 +213,7 @@ class UserManager extends Manager{
         this.client=client;
     }
     /**
-     * @param {String} username User's nickname
+     * @param {string} username User's nickname
      * @returns {Promise<User>} The user with the given nickname
      */
     async fetch(username){
@@ -249,19 +256,19 @@ class UserManager extends Manager{
 }
 class Member{
     /**
-     * @type {String} The member's nickname
+     * @type {string} The member's nickname
      */
     username;
     /**
-     * @type {String} Timestamp of when the member was last seen online
+     * @type {string} Timestamp of when the member was last seen online
      */
     lastseen;
     /**
-     * @type {Number} Amount of points gained by the member
+     * @type {number} Amount of points gained by the member
      */
     points;
     /**
-     * @type {Number} The member's attack to defense ratio
+     * @type {number} The member's attack to defense ratio
      */
     battleratio;
 }
@@ -286,7 +293,7 @@ class MemberManager extends Manager{
         this.client=client;
     }
     /**
-     * @param {Number} limit Maximum amount of members fetched
+     * @param {number} limit Maximum amount of members fetched
      * @returns {Promise<Member[]>} List of members
      */
     async fetch(limit){

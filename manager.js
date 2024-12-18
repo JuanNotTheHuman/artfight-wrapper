@@ -1,7 +1,7 @@
 const NodeCache = require("node-cache");
 class Cache extends NodeCache{
   /**
-   * @type {Number} Size of the cache
+   * @type {number} Size of the cache
    */
   size;
   get size(){
@@ -23,7 +23,7 @@ class Cache extends NodeCache{
   }
   /**
    * 
-   * @param {String} key The key to cache
+   * @param {string} key The key to cache
    * @param {any[]|any} values values to be added to the key
    */
   add(key,values){
@@ -35,11 +35,11 @@ class Cache extends NodeCache{
 }
 class CacheItem{
   /**
-   * @type {String} The string needed to access the value
+   * @type {string} The string needed to access the value
    */
   key;
   /**
-   * @type {Array<{}>} The value accessed by providing the key
+   * @type {any[]} The value accessed by providing the key
    */
   value;
 }

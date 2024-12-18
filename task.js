@@ -2,7 +2,7 @@ const { Page, Browser } = require("puppeteer");
 const {maxpages} = require("./config.json")
 class TaskManager{
     /**
-     * @type {Number} Max amount of pages
+     * @type {number} Max amount of pages
      */
     limit;
     /**
@@ -10,7 +10,7 @@ class TaskManager{
      */
     tasks=[];
     /**
-     * @param {Number} limit Max amount of pages
+     * @param {number} limit Max amount of pages
      */
     constructor(limit){
         if(limit!=undefined){
@@ -32,7 +32,7 @@ class TaskManager{
     }
     /**
      * @param {Array.<Promise>} arr List of tasks to complete
-     * @param {Number} size Chunk size
+     * @param {number} size Chunk size
      * @returns {Array<Array<Promise>>} Chunked list of tasks to complete
      */
     #chunk(arr, size){
@@ -41,11 +41,11 @@ class TaskManager{
 }
 class PageManager {
     /**
-     * @type {Array.<{page:Page,active:Boolean,index:Number}>} List of all pages managed by the manager
+     * @type {Array.<{page:Page,active:Boolean,index:number}>} List of all pages managed by the manager
      */
     #pages = [];
     /**
-     * @type {Number} Amount of pages managed
+     * @type {number} Amount of pages managed
      */
     length;
     get length(){
@@ -75,7 +75,7 @@ class PageManager {
     }
 
     /**
-     * @returns {Promise<{page:Page,active:Boolean,index:Number}>} An inactive page along with its index
+     * @returns {Promise<{page:Page,active:Boolean,index:number}>} An inactive page along with its index
      */
     async get() {
         return new Promise(resolve => {
@@ -94,7 +94,7 @@ class PageManager {
     }
 
     /**
-     * @param {Number} index The index of the page
+     * @param {number} index The index of the page
      * @returns {void} Unactivates the page
      */
     return(index) {
