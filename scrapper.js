@@ -26,7 +26,7 @@ class ArtfightScrapper{
      * @returns {Promise<void>} Logs in the user
      */
     async login(username,password){
-        let browser=await puppeteer.launch();
+        let browser=await puppeteer.launch({headless:false});
         this.pages = new PageManager();
         await this.pages.init(browser);
         /**
@@ -215,13 +215,20 @@ class ArtfightScrapper{
         let description = await (await page.waitForSelector(".character-description")).evaluate(r=>r.textContent);
         let attacks = await this.fetchUserCharacterAttacks(page,x[0],x[1]);
         await page.goto(link);
-        let information = await (await page.evaluate(()=>{
-            let inf = Array.from(document.querySelectorAll("tbody")[1].children).map(r=>r.textContent.replaceAll("\n","").split(":")[1]?.trim());
-            if(inf.length>2){
-                inf[2] = document.querySelectorAll("tbody")[1].children.item(2).children.item(1).children.item(0).href
-            }
-            return inf
-        }))
+        let information;
+        try{
+            information = await (await page.evaluate(()=>{
+                let inf = Array.from(document.querySelectorAll("tbody")[1].children).map(r=>r.textContent.replaceAll("\n","").split(":")[1]?.trim());
+                if(inf.length>2){
+                    inf[2] = document.querySelectorAll("tbody")[1].children.item(2).children.item(1).children.item(0).href
+                }
+                return inf
+            }))
+        }catch(e){
+            await page.screenshot({path:"./error.png"})
+            console.log(e);
+        }
+
         let tags = await (await page.evaluate(()=>{
             return Array.from(document.querySelectorAll(".btn.badge.badge-info.fa-1x.mt-1")).map(r=>r.textContent);
         }))
@@ -460,30 +467,267 @@ class ArtfightScrapper{
      * @param {number} limit Maximum amount of bookmarks fetched
      * @returns {Promise<string[][]>} List of bookmark data
      */
-    async fetchClientUserBookmarks(limit){
-        // add pages
-        let pg = await this.pages.get();
-        let page = pg.page;
-        await page.goto("https://artfight.net/manage/bookmarks");
-        let bookmarks = await page.evaluate(()=>{
-            return Array.from(document.querySelectorAll(".card.mt-2")).map(r=>{
-                let elements = Array.from(r.querySelector(".row").children)
-                let a = elements[0].querySelector(".thumbnail");
-                let adt = a.href.split("/").pop().split(".")
-                let id = adt[0]
-                let icon = a.children[0].src;
-                let bdt = elements[1].children;
-                let name=bdt[0].querySelector("i").innerText;
-                let owner = bdt[0].querySelector("strong").innerText.trim();
-                let description = bdt[1].textContent.trim();
-                let cdt = elements[2].children;
-                let updated = cdt[0].textContent.replace("Updated: ","")
-                let order = cdt[1].textContent.replace("Order: ","")
-                return [id,name,icon,owner,description,updated,order]
-            })
-        })
-        this.pages.return(pg.index);
+    async fetchClientUserBookmarks(limit = 30) {
+        if(limit<=0) throw new Error("Limit cannot be negative or equal to 0");
+        const pagesamm = Math.ceil(limit / 30);
+        const manager = new TaskManager();
+        const bookmarks = [];
+        for (let i = 1; i <= pagesamm; i++) {
+            manager.tasks.push(new Promise(async (resolve, reject) => {
+                try {
+                    const pg = await this.pages.get();
+                    const page = pg.page;
+                    await page.goto(`https://artfight.net/manage/bookmarks?page=${i}`);
+                    const response = await page.evaluate(() => {
+                        return Array.from(document.querySelectorAll(".card.mt-2")).map(card => {
+                            const elements = Array.from(card.querySelector(".row").children);
+                            const a = elements[0].querySelector(".thumbnail");
+                            const adt = a.href.split("/").pop().split(".");
+                            const id = adt[0];
+                            const icon = a.children[0].src;
+                            const bdt = elements[1].children;
+                            const name = bdt[0].querySelector("i").innerText;
+                            const owner = bdt[0].querySelector("strong").innerText.trim();
+                            const description = bdt[1].textContent.trim();
+                            const cdt = elements[2].children;
+                            const updated = cdt[0].textContent.replace("Updated: ", "");
+                            const order = cdt[1].textContent.replace("Order: ", "");
+                            return [id, name, icon, owner, description, updated, order];
+                        });
+                    });
+                    bookmarks.push(...response);
+                    this.pages.return(pg.index);
+                    if (response.length < 30) {
+                        resolve();
+                        return;
+                    }
+                    resolve();
+                } catch (error) {
+                    reject(error);
+                }
+            }));
+        }
+        await manager.execute();
         return bookmarks;
+    }
+    
+    /**
+     * @param {number} index Index of the bookmark to fetch
+     * @returns {Promise<string[]>} Bookmark data
+     */
+    async fetchClientUserBookmarkAtIndex(index) {
+        if(index<0) throw new Error("Index cannot be negative");
+        const pg = await this.pages.get();
+        const page = pg.page;
+        const pageIndex = Math.floor(index / 30) + 1;
+        await page.goto(`https://artfight.net/manage/bookmarks?page=${pageIndex}`);
+        const response = await page.evaluate((index) => {
+            const cardIndex = index % 30;
+            const card = document.querySelectorAll(".card.mt-2")[cardIndex];
+            if(!card) throw new Error("Bookmark not found");
+            const elements = Array.from(card.querySelector(".row").children);
+            const a = elements[0].querySelector(".thumbnail");
+            const adt = a.href.split("/").pop().split(".");
+            const id = adt[0];
+            const icon = a.children[0].src;
+            const bdt = elements[1].children;
+            const name = bdt[0].querySelector("i").innerText;
+            const owner = bdt[0].querySelector("strong").innerText.trim();
+            const description = bdt[1].textContent.trim();
+            const cdt = elements[2].children;
+            const updated = cdt[0].textContent.replace("Updated: ", "");
+            const order = cdt[1].textContent.replace("Order: ", "");
+            return [id, name, icon, owner, description, updated, order];
+        }, index);
+        this.pages.return(pg.index);
+        return response;
+    }
+    
+    /**
+     * @param {number} start Start index of the bookmarks to fetch
+     * @param {number} end End index of the bookmarks to fetch
+     * @returns {Promise<string[][]>} List of bookmark data
+     */
+    async fetchClientUserBookmarksRange(start, end) {
+        if (start > end) throw new Error("Start index cannot be greater than end index");
+        const manager = new TaskManager();
+        const bookmarks = [];
+        const pagesamm = Math.ceil((end - start + 1) / 30);
+        for (let i = 1; i <= pagesamm; i++) {
+            manager.tasks.push(new Promise(async (resolve, reject) => {
+                try {
+                    const pg = await this.pages.get();
+                    const page = pg.page;
+                    await page.goto(`https://artfight.net/manage/bookmarks?page=${i}`);
+                    const response = await page.evaluate(() => {
+                        return Array.from(document.querySelectorAll(".card.mt-2")).map(card => {
+                            const elements = Array.from(card.querySelector(".row").children);
+                            const a = elements[0].querySelector(".thumbnail");
+                            const adt = a.href.split("/").pop().split(".");
+                            const id = adt[0];
+                            const icon = a.children[0].src;
+                            const bdt = elements[1].children;
+                            const name = bdt[0].querySelector("i").innerText;
+                            const owner = bdt[0].querySelector("strong").innerText.trim();
+                            const description = bdt[1].textContent.trim();
+                            const cdt = elements[2].children;
+                            const updated = cdt[0].textContent.replace("Updated: ", "");
+                            const order = cdt[1].textContent.replace("Order: ", "");
+                            return [id, name, icon, owner, description, updated, order];
+                        });
+                    });
+                    bookmarks.push(...response);
+                    this.pages.return(pg.index);
+                    if (response.length < 30) {
+                        resolve();
+                        return;
+                    }
+                    resolve();
+                } catch (error) {
+                    reject(error);
+                }
+            }));
+        }
+        await manager.execute();
+        return bookmarks.slice(start - 1, end);
+    }
+    /**
+     * @param {number} amount Amount of bookmarks to delete 
+     * @returns {Promise<string[]>} IDs of the deleted bookmarks
+     */
+    async deleteClientUserBookmarks(amount = 1) {
+        const pg = await this.pages.get();
+        const page = pg.page;
+        await page.goto("https://artfight.net/manage/bookmarks");
+        const deletedIds = [];
+        for (let i = 0; i < amount; i++) {
+            const id = await page.evaluate(() => {
+                const card = document.querySelector(".card.mt-2");
+                if (!card) throw new Error("No bookmarks to delete");
+                const editBookmarkButton = card.querySelector(".edit-bookmark");
+                if (!editBookmarkButton) throw new Error("Edit bookmark button not found");
+                const a = card.querySelector(".thumbnail");
+                const adt = a.href.split("/").pop().split(".");
+                const id = adt[0];
+                editBookmarkButton.click();
+                return id;
+            });
+            await page.waitForSelector(".btn.btn-danger");
+            await page.evaluate(() => {
+                const deleteButton = document.querySelector(".btn.btn-danger");
+                if (!deleteButton) throw new Error("Delete button not found");
+                deleteButton.click();
+            });
+            await page.waitForNavigation();
+            deletedIds.push(id);
+        }
+        this.pages.return(pg.index);
+        return deletedIds;
+    }
+    /**
+     * @param {string} id The character id of the bookmark to be deleted
+     * @returns {Promise<boolean>} Whether the bookmark was deleted
+     */
+    async deleteClientUserBookmarkByCharacterId(id) {
+        const pg = await this.pages.get();
+        const page = pg.page;
+        await page.goto(`https://artfight.net/manage/bookmarks`);
+        const response = await page.evaluate((id) => {
+            const card = Array.from(document.querySelectorAll(".card.mt-2")).find(card => {
+                const a = card.querySelector(".thumbnail");
+                const adt = a.href.split("/").pop().split(".");
+                return adt[0] === id;
+            });
+            if(!card) throw new Error("Bookmark not found");
+            const editBookmarkButton = card.querySelector(".edit-bookmark");
+            if(!editBookmarkButton) throw new Error("Edit bookmark button not found");
+            editBookmarkButton.click();
+            const deleteButton = document.querySelector(".btn.btn-danger");
+            if(!deleteButton) throw new Error("Delete button not found");
+            deleteButton.click();
+            return true;
+        }, id);
+        this.pages.return(pg.index);
+        return response==true;
+    }
+    /**
+     * @returns {Promise<void>} Deletes all bookmarks
+     */
+    async deleteClientUserBookmarksAll() {
+        const pg = await this.pages.get();
+        const page = pg.page;
+        await page.goto("https://artfight.net/manage/bookmarks");
+        while (true) {
+            const hasBookmark = await page.evaluate(() => {
+                const card = document.querySelector(".card.mt-2");
+                if (!card) return false;
+                const editBookmarkButton = card.querySelector(".edit-bookmark");
+                if (!editBookmarkButton) throw new Error("Edit bookmark button not found");
+                editBookmarkButton.click();
+                return true;
+            });
+            if (!hasBookmark) break;
+            await page.waitForSelector(".btn.btn-danger");
+            await page.evaluate(() => {
+                const deleteButton = document.querySelector(".btn.btn-danger");
+                if (!deleteButton) throw new Error("Delete button not found");
+                deleteButton.click();
+            });
+            await page.waitForNavigation();
+        }
+        this.pages.return(pg.index);
+    }
+    /**
+     * @param {string} id The character id to bookmark
+     * @param {string} order The order of the bookmark
+     * @param {string} description The description of the bookmark `(not working)`
+     * @returns {Promise<boolean>} Whether the character was bookmarked
+     */
+    async bookmarkCharacter(id, order = 0, description = "") {
+        //i tried like 20 time to make description but it doesn't work, feel free to try it yourself
+        const pg = await this.pages.get();
+        const page = pg.page;
+        const index = pg.index;
+        await page.goto(`https://artfight.net/character/${id}`);
+        await page.waitForSelector(".bookmark-character");
+        await page.evaluate(() => {
+            document.querySelector(".bookmark-character").click();
+        });
+        await page.waitForSelector("#modal");
+        await page.waitForSelector("input#order");
+        await page.evaluate(() => {
+            document.querySelector("input#order").value = "";
+        });
+        await page.type("input#order", order.toString());
+        await page.evaluate(() => {
+            document.querySelector("#modal-form").submit();
+        });
+        this.pages.return(index);
+        return true;
+    }
+    /**
+     * To be implemented
+     * 
+     * @param {string} id The id of the character to unbookmark
+     * @returns {Promise<boolean>} Whether the character was unbookmarked
+     */
+    async unbookmarkCharacter(id){
+        // let pg = await this.pages.get();
+        // let page = pg.page;
+        // let index = pg.index;
+        // await page.goto(`https://artfight.net/character/${id}`);
+        // await page.waitForSelector(".bookmark-character");
+        // await page.evaluate(()=>{
+        //     document.querySelector(".bookmark-character").click();
+        // })
+        // await page.screenshot({path:"./unbookmark.png"})
+        // await page.waitForSelector(".btn-danger");
+        // await page.evaluate(()=>{
+        //     document.querySelector(".btn-danger").click();
+        // })
+        // console.log("Unbookmarked")
+        // this.pages.return(index);
+        // return true;
     }
 }
 module.exports={ArtfightScrapper};

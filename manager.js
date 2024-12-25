@@ -8,7 +8,6 @@ class Cache extends NodeCache{
     return this.keys().length;
   }
   /**
-   * 
    * @param {NodeCache.Options} args Native NodeCache options
    */
   constructor(args){
@@ -22,7 +21,6 @@ class Cache extends NodeCache{
     return Object.values(this.mget(this.keys()));
   }
   /**
-   * 
    * @param {string} key The key to cache
    * @param {any[]|any} values values to be added to the key
    */
@@ -31,6 +29,13 @@ class Cache extends NodeCache{
       values=[values]
     }
     this.set(key,this.get(key).push(...values))
+  }
+  /**
+   * @param {string} key The key to cache
+   * @returns {number} Amount of keys deleted
+   */
+  delete(key){
+    return this.del(key);
   }
 }
 class CacheItem{

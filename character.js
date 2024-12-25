@@ -1,3 +1,4 @@
+const { ArtfightClient } = require("./client");
 const { Comment } = require("./comment");
 const { Manager } = require("./manager");
 const { ArtfightScrapper } = require("./scrapper");
@@ -68,16 +69,22 @@ class Character{
         this.comments=comments;
     }
     /**
-     * To be implemented, bookmarks the character
+     * @param {ArtfightClient} client The Artfight client
+     * @param {number} order Order of the character
+     * @param {string} description Description of the bookmark `(not working)`
+     * @returns {Promise<void>} Bookmarks the character
      */
-    async bookmark(){
-        
+    async bookmark(client,order,description){
+     await client.scrapper.bookmarkCharacter(this.id,order,description);
     }
     /**
-     * To be implemented, unbookmarks the character
+     * To be implemented
+     * 
+     * @param {ArtfightClient} client The Artfight client
+     * @returns {Promise<void>} Unbookmarks the character
      */
-    async unbookmark(){
-
+    async unbookmark(client){
+        await client.scrapper.unbookmarkCharacter(this.id);
     }
     /**
      * @returns {string} Link to the character
@@ -138,7 +145,10 @@ class CharacterManager extends Manager{
          * @type {Character}
          */
         let character = await this.#scrapper.fetchRandomCharacter();
-        if(!this.cache.get(character.information.owner).map(r=>r.name).has(character.name)){
+        console.log(character)
+        if(!this.cache.has(character.information.owner)){
+            this.cache.set(character.information.owner,[character])
+        }else if(!this.cache.get(character.information.owner)?.map(r=>r.name).has(character.name)){
             /**
              * @type {Character[]}
              */

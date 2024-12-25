@@ -55,8 +55,11 @@ class PageManager {
      * @param {Browser} browser The browser to manage the pages in
      */
     async init(browser) {
-        for (let index = 0; index < maxpages; index++) {
-            let page = await browser.newPage();
+        for(let i=0;i<maxpages-1;i++){
+            await browser.newPage();
+        }
+        let index = 0;
+        for (let page of await browser.pages()) {
             let pageObject = { page };
             Object.defineProperty(pageObject, 'active', {
                 value: false,
@@ -71,6 +74,7 @@ class PageManager {
                 enumerable: true
             });
             this.#pages[index] = pageObject;
+            index++;
         }
     }
 
