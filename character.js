@@ -206,7 +206,3 @@ class CharacterManager extends Manager{
     }
 }
 module.exports={CharacterManager, Character, CharacterInformation};
-/**
- * TODO:
- * Implement complete
- */

@@ -236,7 +236,6 @@ class SubmitionManager extends Manager{
 module.exports={Submition,Revenge,SubmitionManager,SubmitionInformation,SubmitionStatistics,SubmitionCharacter}
 /**
  * TODO:
- * Impletent complete
  * TBA - To be added
  * More...
  */

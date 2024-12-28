@@ -301,6 +301,4 @@ module.exports={User,UserManager,ClientUser,UserStatus,MemberManager,Member}
 /**
  * TODO:
  * Expand ClientUser
- * Implement cache (for all managers basically)
- * Implement completes
  */

@@ -118,5 +118,5 @@ class PageManager {
 module.exports={TaskManager,PageManager};
 /**
  * TODO:
- * maybe some optimization
+ * maybe some optimization for the TaskManager 
  */
