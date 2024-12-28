@@ -1,8 +1,7 @@
 const { default: puppeteer} = require("puppeteer");
 const { PageManager, TaskManager } = require("./task");
 const { Submition, SubmitionInformation, SubmitionStatistics } = require("./sumbition");
-const {Member} = require("./user")
-const {Complete} = require("./complete")
+const {Complete} = require("./Enumarables")
 const { Page } = require("puppeteer");
 const { ArtfightClient } = require("./client");
 class ArtfightScrapper{
@@ -441,7 +440,7 @@ class ArtfightScrapper{
         let index = pg.index;
         await page.goto("https://artfight.net/character/random/");
         await page.waitForSelector(".profile-header");
-        let character = this.fetchUserCharacter(page.url());
+        let character = await this.fetchUserCharacter(page.url());
         this.pages.return(index);
         return character;
     }
@@ -629,26 +628,35 @@ class ArtfightScrapper{
      * @returns {Promise<boolean>} Whether the bookmark was deleted
      */
     async deleteClientUserBookmarkByCharacterId(id) {
-        const pg = await this.pages.get();
-        const page = pg.page;
-        await page.goto(`https://artfight.net/manage/bookmarks`);
-        const response = await page.evaluate((id) => {
-            const card = Array.from(document.querySelectorAll(".card.mt-2")).find(card => {
-                const a = card.querySelector(".thumbnail");
-                const adt = a.href.split("/").pop().split(".");
-                return adt[0] === id;
-            });
-            if(!card) throw new Error("Bookmark not found");
-            const editBookmarkButton = card.querySelector(".edit-bookmark");
-            if(!editBookmarkButton) throw new Error("Edit bookmark button not found");
-            editBookmarkButton.click();
-            const deleteButton = document.querySelector(".btn.btn-danger");
-            if(!deleteButton) throw new Error("Delete button not found");
-            deleteButton.click();
-            return true;
-        }, id);
-        this.pages.return(pg.index);
-        return response==true;
+        const manager = new TaskManager();
+        let pagenum=1;
+        manager.tasks.push(new Promise(async res=>{
+            let pg = await this.pages.get();
+            let page = pg.page;
+            await page.goto(`https://artfight.net/manage/bookmarks?page=${pagenum}`);
+            let response = await page.evaluate((id)=>{
+                if(document.querySelectorAll(".card.mt-2").length==0){
+                    throw new Error("Bookmark not found");
+                }
+                const card = Array.from(document.querySelectorAll(".card.mt-2")).find(card => {
+                    const a = card.querySelector(".thumbnail");
+                    const adt = a.href.split("/").pop().split(".");
+                    return adt[0] === id;
+                });
+                if(!card) return false;
+                const editBookmarkButton = card.querySelector(".edit-bookmark");
+                if(!editBookmarkButton) return false;
+                editBookmarkButton.click();
+                const deleteButton = document.querySelector(".btn.btn-danger");
+                if(!deleteButton) return false;
+                deleteButton.click();
+                manager.emit("executionStop");
+                return true;
+            },id);
+            this.pages.return(pg.index);
+            res(response);
+        }));
+        await manager.execute();
     }
     /**
      * @returns {Promise<void>} Deletes all bookmarks
@@ -706,28 +714,24 @@ class ArtfightScrapper{
         return true;
     }
     /**
-     * To be implemented
-     * 
      * @param {string} id The id of the character to unbookmark
      * @returns {Promise<boolean>} Whether the character was unbookmarked
      */
     async unbookmarkCharacter(id){
-        // let pg = await this.pages.get();
-        // let page = pg.page;
-        // let index = pg.index;
-        // await page.goto(`https://artfight.net/character/${id}`);
-        // await page.waitForSelector(".bookmark-character");
-        // await page.evaluate(()=>{
-        //     document.querySelector(".bookmark-character").click();
-        // })
-        // await page.screenshot({path:"./unbookmark.png"})
-        // await page.waitForSelector(".btn-danger");
-        // await page.evaluate(()=>{
-        //     document.querySelector(".btn-danger").click();
-        // })
-        // console.log("Unbookmarked")
-        // this.pages.return(index);
-        // return true;
+        let pg = await this.pages.get();
+        let page = pg.page;
+        let index = pg.index;
+        await page.goto(`https://artfight.net/character/${id}`);
+        await page.waitForSelector(".bookmark-character");
+        await page.evaluate(()=>{
+            document.querySelector(".bookmark-character").click();
+        })
+        await page.waitForSelector("input.btn-danger");
+        await page.evaluate(()=>{
+            document.querySelector("input.btn-danger").click();
+        })
+        this.pages.return(index);
+        return true;
     }
 }
 module.exports={ArtfightScrapper};

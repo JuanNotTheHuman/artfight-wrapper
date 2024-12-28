@@ -12,7 +12,6 @@ class Cache extends NodeCache{
    */
   constructor(args){
     super(args);
-    this.size=this.keys().length;
   }
   /**
    * @returns {Array<CacheItem>} All of the values of the cache
@@ -21,7 +20,7 @@ class Cache extends NodeCache{
     return Object.values(this.mget(this.keys()));
   }
   /**
-   * @param {string} key The key to cache
+   * @param {NodeCache.Key} key The key to cache
    * @param {any[]|any} values values to be added to the key
    */
   add(key,values){
@@ -29,18 +28,20 @@ class Cache extends NodeCache{
       values=[values]
     }
     this.set(key,this.get(key).push(...values))
+    this.emit("valueAdded",{key,values})
   }
   /**
-   * @param {string} key The key to cache
+   * @param {NodeCache.Key} key The key to cache
    * @returns {number} Amount of keys deleted
    */
   delete(key){
+    this.emit("valueDeleted",{key})
     return this.del(key);
   }
 }
 class CacheItem{
   /**
-   * @type {string} The string needed to access the value
+   * @type {NodeCache.Key} The string needed to access the value
    */
   key;
   /**
@@ -48,7 +49,7 @@ class CacheItem{
    */
   value;
 }
-class Manager {
+class Manager{
     /**
      * @type {Cache} Cached fetched enties from the manager
      */

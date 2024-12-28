@@ -1,5 +1,5 @@
-const {ArtfightScrapper} = require("./scrapper");
 const {Manager,Cache } = require("./manager");
+const { ArtfightClient } = require("./client");
 class SubmitionInformation{
     /**
      * @type {string} The user that submitted the attack
@@ -195,17 +195,17 @@ class SubmitionManager extends Manager{
      */
     type;
     /**
-     * @type {ArtfightScrapper} The manager's scapper
+     * @type {ArtfightClient} The manager's client
      */
-    #scrapper
+    client
     /**
-     * @param {ArtfightScrapper} scrapper The manager's scapper
+     * @param {ArtfightClient} client The manager's client
      * @param {Cache} cache The manager's cache manager
      * @param {string} type The manager's type
      */
-    constructor(scrapper,cache,type){
+    constructor(client,cache,type){
         super(cache)
-        this.#scrapper=scrapper;
+        this.client=client;
         this.type = type;
     }
     /**
@@ -214,17 +214,19 @@ class SubmitionManager extends Manager{
      * @returns {Promise<Submition[]>}
      */
     async fetch(username,limit=5){
-        let submitions = await this.#scrapper.fetchSubmitions(username,limit,this.type);
+        let submitions = await this.client.scrapper.fetchSubmitions(username,limit,this.type);
         for(let submition of submitions){
             if(this.type=="attack"){
-                if(!this.#scrapper.client.attacks.cache.get(username).has(submition)){
-                    let arr = this.#scrapper.client.attacks.cache.get(username).push(submition);
-                    this.#scrapper.client.attacks.cache.set(username,arr)
+                if(!this.client.attacks.cache.get(username).has(submition)){
+                    let arr = this.client.attacks.cache.get(username).push(submition);
+                    this.client.attacks.cache.set(username,arr)
+                    this.client.emit("attackCacheUpdate",{type:CacheUpdateTypes.Add,value:submition});
                 }
             }else{
-                if(!this.#scrapper.client.defenses.cache.get(username).has(submition)){
-                    let arr = this.#scrapper.client.defenses.cache.get(username).push(submition);
-                    this.#scrapper.client.defenses.cache.set(username,arr)
+                if(!this.client.defenses.cache.get(username).has(submition)){
+                    let arr = this.client.defenses.cache.get(username).push(submition);
+                    this.client.defenses.cache.set(username,arr)
+                    this.client.emit("defenseCacheUpdate",{type:CacheUpdateTypes.Add,value:submition});
                 }
             }
         }

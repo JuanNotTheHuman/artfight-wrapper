@@ -1,6 +1,7 @@
 const { Page, Browser } = require("puppeteer");
 const {maxpages} = require("./config.json")
-class TaskManager{
+const { EventEmitter } = require("events");
+class TaskManager extends EventEmitter{
     /**
      * @type {number} Max amount of pages
      */
@@ -12,14 +13,17 @@ class TaskManager{
     /**
      * @param {number} limit Max amount of pages
      */
-    constructor(limit){
-        if(limit!=undefined){
-            this.limit=limit
-        }else if(limit===null||maxpages===null){
-            this.limit=50; //failsafe so the puppeteer doesnt take up all ram
-        }else{
+    constructor(limit=50){
+        super();
+        if(maxpages!=undefined&&limit!=50){
             this.limit=maxpages;
+        }else{
+            this.limit=limit;
         }
+        this.stopped=false;
+        this.on("executionStop",(reason)=>{
+            this.stopped=true;
+        })
     }
     /**
      * Executes all of the manager's tasks in batches
@@ -27,7 +31,9 @@ class TaskManager{
     async execute(){
         let arr = this.#chunk(this.tasks,this.limit);
         for(let i=0;i<arr.length;i++){
+            if(this.stopped)break;
             await Promise.all(arr[i]);
+            this.emit("executionStep",`Executed batch ${i+1}/${arr.length}`)
         }
     }
     /**

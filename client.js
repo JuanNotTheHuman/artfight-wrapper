@@ -5,7 +5,7 @@ const {ArtfightScrapper} = require("./scrapper");
 const { CharacterManager } = require("./character");
 const {EventEmitter} = require("events");
 const {BookmarkManager} =require("./bookmark")
-const { Complete } = require("./complete");
+const { Complete } = require("./Enumarables");
 class ArtfightClient extends EventEmitter{
     /**
      * @type {ArtfightScrapper} The client's scrapper
@@ -42,22 +42,23 @@ class ArtfightClient extends EventEmitter{
     /**
      * @param {string} username Username for login
      * @param {string} password Password for login
-     * @param {Function} callback Function that gets called after login
+     * @param {Function|undefined} callback Function that gets called after login
      * @param {Complete|Complete[]} completes Allowed types (made for better cpu performance), specifies which types to fetch completely.
      */
-    async login(username,password,callback,completes){
+    async login(username,password,callback,completes=Complete.None){
         await this.scrapper.login(username,password);
-        this.users=new UserManager(this.scrapper,new Cache(),this);
-        this.attacks=new SubmitionManager(this.scrapper,new Cache(),"attack");
-        this.defenses=new SubmitionManager(this.scrapper,new Cache(),"defense");
-        this.characters=new CharacterManager(this.scrapper,new Cache());
-        this.members=new MemberManager(this.scrapper,new Cache(),this);
+        this.users=new UserManager(this,new Cache());
+        this.attacks=new SubmitionManager(this,new Cache(),"attack");
+        this.defenses=new SubmitionManager(this,new Cache(),"defense");
+        this.characters=new CharacterManager(this,new Cache());
+        this.members=new MemberManager(this,new Cache(),this);
         this.user=await new ClientUser(this,username).init();
-        this.user.bookmarks=new BookmarkManager(this.scrapper,new Cache(),this);
+        this.user.bookmarks=new BookmarkManager(this,new Cache());
         this.completes=completes;
         if(callback!=undefined){
             callback()
         }
+        this.emit("ready",this)
     }
 }
 module.exports={ArtfightClient}

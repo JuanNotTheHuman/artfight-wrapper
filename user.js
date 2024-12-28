@@ -3,7 +3,7 @@ const {TaskManager} = require("./task");
 const {SubmitionManager } = require("./sumbition");
 const { Manager, Cache } = require("./manager");
 const { ArtfightClient } = require("./client");
-const { ArtfightScrapper } = require("./scrapper");
+const { CacheUpdateTypes } = require("./Enumarables");
 const {BookmarkManager} = require("./bookmark")
 class UserStatus{
     /**
@@ -191,6 +191,7 @@ class ClientUser extends User{
             r();
         }));
         await manager.execute();
+        this.client.emit("clientUserReady",this);
         return user;
     }
 }
@@ -200,16 +201,11 @@ class UserManager extends Manager{
      */
     client;
     /**
-     * @type {ArtfightScrapper} The Artfight scrapper
-     */
-    #scrapper;
-    /**
-     * @param {ArtfightScrapper} scrapper The Artfight scrapper
      * @param {Cache} cache The cache
+     * @param {ArtfightClient} client The Artfight client
      */
-    constructor(scrapper,cache,client){
+    constructor(client,cache){
         super(cache);
-        this.#scrapper=scrapper;
         this.client=client;
     }
     /**
@@ -220,26 +216,27 @@ class UserManager extends Manager{
         const user = new User(this.client,username);
         const manager = new TaskManager();
         manager.tasks.push(new Promise(async r=>{
-          user.status=new UserStatus(...Object.values(await this.#scrapper.fetchUserStatus(username)));
+          user.status=new UserStatus(...Object.values(await this.client.scrapper.fetchUserStatus(username)));
           r();
         }),new Promise(async r=>{
-            user.avatar=await this.#scrapper.fetchUserImage(username);
+            user.avatar=await this.client.scrapper.fetchUserImage(username);
             r();
         }),new Promise(async r=>{
-            let [current,overall,achivements] = await Object.values(await this.#scrapper.fetchUserStatistics(username));
+            let [current,overall,achivements] = await Object.values(await this.client.scrapper.fetchUserStatistics(username));
             user.statistics=new UserStatistics(new BattleStatistics(...overall),new BattleStatistics(...current),achivements.map(r=>r[1]));
             r();
         }),new Promise(async r=>{
-            let pg=await this.#scrapper.pages.get();
+            let pg=await this.client.scrapper.pages.get();
             await pg.page.goto(`https://artfight.net/~${username}`)
-            let comments = await this.#scrapper.fetchComments(pg.page)
+            let comments = await this.client.scrapper.fetchComments(pg.page)
             user.comments=comments;
-            this.#scrapper.pages.return(pg.index);
+            this.client.scrapper.pages.return(pg.index);
             r();
         }));
         await manager.execute();
         if(!this.cache.has(user.username)){
             this.cache.set(user.username,user)
+            this.client.emit("userCacheUpdate",{type:CacheUpdateTypes.Add,value:user})
         }
         return user;
     }
@@ -247,7 +244,7 @@ class UserManager extends Manager{
      * @returns {Promise<User} A random user
      */
     async random(){
-        let user = await this.fetch(await this.#scrapper.fetchRandomUsername());
+        let user = await this.fetch(await this.client.scrapper.fetchRandomUsername());
         if(!this.cache.has(user.username)){
             this.cache.set(user.username,user);
         }
@@ -278,18 +275,11 @@ class MemberManager extends Manager{
      */
     client;
     /**
-     * @type {ArtfightScrapper} The Artfight scrapper
-     */
-    #scrapper;
-    /**
-     * 
-     * @param {ArtfightScrapper} scrapper The Artfight scrapper
      * @param {Cache} cache The cache
      * @param {ArtfightClient} client The Artfight client 
      */
-    constructor(scrapper,cache,client){
+    constructor(client,cache){
         super(cache);
-        this.#scrapper=scrapper;
         this.client=client;
     }
     /**
@@ -297,12 +287,13 @@ class MemberManager extends Manager{
      * @returns {Promise<Member[]>} List of members
      */
     async fetch(limit){
-        let members = await this.#scrapper.fetchMembers(limit);
+        let members = await this.client.crapper.fetchMembers(limit);
         for(let member of members){
             if(!this.cache.has(member.username)){
                 this.cache.set(member.username,username);
             }
         }
+        this.client.emit("memberCacheUpdate",{type:CacheUpdateTypes.Add,value:members});
         return members;
     }
 }

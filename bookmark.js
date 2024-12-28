@@ -1,6 +1,6 @@
-const {ArtfightScrapper} = require("./scrapper")
 const {ArtfightClient} = require("./client")
-const {Manager} = require("./manager")
+const {Manager,Cache} = require("./manager")
+const {CacheUpdateTypes} = require("./Enumarables")
 class BookmarkCharacter{
     /**
      * @type {string} The character's identification index
@@ -53,10 +53,14 @@ class BookmarkCharacter{
         return `https://artfight.net/character/${this.id}.${this.name}`
     }
     /**
-     * To be added, removes the bookmark
+     * @param {ArtfightClient} client The Artfight client
+     * @returns {Promise<void>} Unbookmarks the character
      */
-    async remove(){
-
+    async remove(client){
+        await client.scrapper.unbookmarkCharacter(this.id);
+        if(client.user.bookmarks.cache.has(this.id)){
+            client.user.bookmarks.cache.delete(this.id);
+        }
     }
 }
 class BookmarkManager extends Manager{
@@ -65,17 +69,11 @@ class BookmarkManager extends Manager{
      */
     client;
     /**
-    * @type {ArtfightScrapper} The Artfight scrapper
-    */
-    #scrapper;
-    /**
-    * @param {ArtfightScrapper} scrapper The Artfight scrapper
     * @param {Cache} cache The cache
     * @param {ArtfightClient} client The Artfight client 
     */
-    constructor(scrapper,cache,client){
+    constructor(client,cache){
         super(cache);
-        this.#scrapper=scrapper;
         this.client=client;
     }
     /**
@@ -83,23 +81,28 @@ class BookmarkManager extends Manager{
      * @return {Promise<BookmarkCharacter[]>} List of bookmarks
      */
     async fetch(limit){
-        return (await this.#scrapper.fetchClientUserBookmarks(limit)).map(r=>{
+        let bookmarks = (await this.client.scrapper.fetchClientUserBookmarks(limit)).map(r=>{
             let bookmark = new BookmarkCharacter(...r)
             if(!this.cache.has(bookmark.id)){
                 this.cache.set(bookmark.id,bookmark)
+
             }
             return bookmark;
         })
+        this.client.emit("bookmarkCacheUpdate",{type:CacheUpdateTypes.Add,value:bookmarks})
+        return bookmarks;
     }
     /**
      * @param {number} index Index of the bookmark to be fetched starting from 0
      * @returns {Promise<BookmarkCharacter>} The bookmark at the specified index
      */
     async fetchIndex(index){
-       let bookmark = new BookmarkCharacter(...(await this.#scrapper.fetchClientUserBookmarksIndex(index)))
+       let bookmark = new BookmarkCharacter(...(await this.client.scrapper.fetchClientUserBookmarksIndex(index)))
        if(!this.cache.has(bookmark.id)){
            this.cache.set(bookmark.id,bookmark)
        }
+       this.client.emit("bookmarkCacheUpdate",{type:CacheUpdateTypes.Add,value:bookmark})
+       return bookmark;
     }
     /**
      * 
@@ -108,31 +111,35 @@ class BookmarkManager extends Manager{
      * @returns {Promise<BookmarkCharacter[]>} List of bookmarks in the specified range
      */
     async fetchRange(start,end){
-        return (await this.#scrapper.fetchClientUserBookmarksRange(start,end)).map(r=>{
+        let bookmarks = (await this.client.scrapper.fetchClientUserBookmarksRange(start,end)).map(r=>{
             let bookmark = new BookmarkCharacter(...r)
             if(!this.cache.has(bookmark.id)){
                 this.cache.set(bookmark.id,bookmark)
             }
             return bookmark;
         })
+        this.client.emit("bookmarkCacheUpdate",{type:CacheUpdateTypes.Add,value:bookmarks})
     }
     /**
      * Removes bookmarks from both cache and Artfight
      * @param {number} amount Amount of bookmarks to be removed, starting from beggining
      */
     async remove(amount){
-        let ids = await this.#scrapper.deleteClientUserBookmarks(amount);
+        let ids = await this.client.scrapper.deleteClientUserBookmarks(amount);
         for(let id of ids){
             this.cache.delete(id);
         }
+        this.client.emit("bookmarkCacheUpdate",{type:"delete",value:ids})
+        return ids;
     }
     /**
      * Removes the bookmark at the specified index from cache and Artfight
      * @param {number} id Identification index of bookmark's character to be removed
      */
     async removeCharacterById(id){
-        if(await this.#scrapper.deleteClientUserBookmarkByCharacterId(id)==true){
+        if(await this.client.scrapper.deleteClientUserBookmarkByCharacterId(id)==true){
             this.cache.delete(id);
+            this.client.emit("bookmarkCacheUpdate",{type:"delete",value:id})
         }
     }
     /**
@@ -140,7 +147,8 @@ class BookmarkManager extends Manager{
      * @returns {Promise<void>} 
      */
     async removeAll(){
-        await this.#scrapper.deleteClientUserBookmarksAll();
+        await this.client.scrapper.deleteClientUserBookmarksAll();
+        this.client.emit("bookmarkCacheUpdate",{type:"delete",value:this.cache.keys()})
         this.cache.flushAll();
     }
 }

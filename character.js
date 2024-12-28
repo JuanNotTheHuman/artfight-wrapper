@@ -3,6 +3,7 @@ const { Comment } = require("./comment");
 const { Manager } = require("./manager");
 const { ArtfightScrapper } = require("./scrapper");
 const {Submition} = require("./sumbition");
+const {CacheUpdateTypes} = require("./Enumarables")
 class Character{
     /**
      * @type {string} Identification index of the character
@@ -76,15 +77,21 @@ class Character{
      */
     async bookmark(client,order,description){
      await client.scrapper.bookmarkCharacter(this.id,order,description);
+     if(!client.user.bookmarks.cache.has(this.id)){
+         client.user.bookmarks.cache.set(this.id,this)
+     }
+     client.emit("bookmarkCacheUpdate",{type:CacheUpdateTypes.Add,data:this})
     }
     /**
-     * To be implemented
-     * 
      * @param {ArtfightClient} client The Artfight client
      * @returns {Promise<void>} Unbookmarks the character
      */
     async unbookmark(client){
         await client.scrapper.unbookmarkCharacter(this.id);
+        if(client.user.bookmarks.cache.has(this.id)){
+            client.user.bookmarks.cache.delete(this.id);
+        }
+        client.emit("bookmarkCacheUpdate",{type:"remove",data:this})
     }
     /**
      * @returns {string} Link to the character
@@ -117,25 +124,45 @@ class CharacterInformation{
 }
 class CharacterManager extends Manager{
     /**
-     * @type {ArtfightScrapper} The manager's scrapper
+     * @type {ArtfightClient} The manager's client
      */
-    #scrapper;
+    client;
     /**
-     * @param {ArtfightScrapper} scrapper The manager's scrapper
+     * @param {ArtfightClient} client The manager's client
      * @param {Cache} cache The manager's cache manager
      */
-    constructor(scrapper,cache){
+    constructor(client,cache){
         super(cache);
-        this.#scrapper=scrapper;
+        this.client=client;
     }
     /**
      * @param {string} username The User's username
      * @returns {Promise<Character[]>} All of the User's characters
      */
     async fetch(username){
-        let characters = await this.#scrapper.fetchUserCharacters(username);
+        let characters = await this.client.scrapper.fetchUserCharacters(username);
         this.cache.set(username,characters)
+        this.client.emit("characterCacheUpdate",{type:CacheUpdateTypes.Add,value:characters})
         return characters;
+    }
+    /**
+     * @param {string} id The character's identification index
+     * 
+     */
+    async fetchById(id){
+        let character = await this.client.scrapper.fetchUserCharacter(`https://artfight.net/character/${id}`);
+        if(!this.cache.has(character.information.owner)){
+            this.cache.set(character.information.owner,[character])
+            this.client.emit("characterCacheUpdate",{type:CacheUpdateTypes.Add,value:character})
+        }else if(!this.cache.get(character.information.owner)?.map(r=>r.name).has(character.name)){
+            /**
+             * @type {Character[]}
+             */
+            let arr = this.cache.get(character.information.owner).push(character)
+            this.cache.set(character.information.owner,arr)
+            this.client.emit("characterCacheUpdate",{type:CacheUpdateTypes.Add,value:character})
+        }
+        return character;
     }
     /**
      * @returns {Promise<Character>} A random character
@@ -144,16 +171,17 @@ class CharacterManager extends Manager{
         /**
          * @type {Character}
          */
-        let character = await this.#scrapper.fetchRandomCharacter();
-        console.log(character)
+        let character = await this.client.scrapper.fetchRandomCharacter();
         if(!this.cache.has(character.information.owner)){
             this.cache.set(character.information.owner,[character])
+            this.client.emit("characterCacheUpdate",{type:CacheUpdateTypes.Add,value:character})
         }else if(!this.cache.get(character.information.owner)?.map(r=>r.name).has(character.name)){
             /**
              * @type {Character[]}
              */
             let arr = this.cache.get(character.information.owner).push(character)
             this.cache.set(character.information.owner,arr)
+            this.client.emit("characterCacheUpdate",{type:CacheUpdateTypes.Add,value:character})
         }
         return character;
     }
@@ -163,7 +191,7 @@ class CharacterManager extends Manager{
      * @returns {Character[]} Array of characters
      */
     async tagSearch(tags,limit){
-        let characters = await this.#scrapper.fetchCharactersByTag(tags,limit);
+        let characters = await this.client.scrapper.fetchCharactersByTag(tags,limit);
         for(let character of characters){
             if(!this.cache.get(character.information.owner).map(r=>r.name).has(character.name)){
                 /**
@@ -171,6 +199,7 @@ class CharacterManager extends Manager{
                  */
                 let arr = this.cache.get(character.information.owner).push(character)
                 this.cache.set(character.information.owner,arr)
+                this.client.emit("characterCacheUpdate",{type:CacheUpdateTypes.Add,value:character})
             }
         }
         return characters;
