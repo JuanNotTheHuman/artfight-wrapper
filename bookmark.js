@@ -123,6 +123,7 @@ class BookmarkManager extends Manager{
     /**
      * Removes bookmarks from both cache and Artfight
      * @param {number} amount Amount of bookmarks to be removed, starting from beggining
+     * @returns {Promise<string[]>} List of identification indexes of removed bookmarks
      */
     async remove(amount){
         let ids = await this.client.scrapper.deleteClientUserBookmarks(amount);
@@ -135,12 +136,15 @@ class BookmarkManager extends Manager{
     /**
      * Removes the bookmark at the specified index from cache and Artfight
      * @param {number} id Identification index of bookmark's character to be removed
+     * @return {Promise<boolean>} Whether the bookmark was removed successfully
      */
     async removeCharacterById(id){
         if(await this.client.scrapper.deleteClientUserBookmarkByCharacterId(id)==true){
             this.cache.delete(id);
             this.client.emit("bookmarkCacheUpdate",{type:"delete",value:id})
+            return true;
         }
+        return false;
     }
     /**
      * Removes all bookmarks from cache and Artfight
@@ -150,6 +154,7 @@ class BookmarkManager extends Manager{
         await this.client.scrapper.deleteClientUserBookmarksAll();
         this.client.emit("bookmarkCacheUpdate",{type:"delete",value:this.cache.keys()})
         this.cache.flushAll();
+        return;
     }
 }
 module.exports={BookmarkManager,BookmarkCharacter}

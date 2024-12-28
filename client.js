@@ -42,10 +42,9 @@ class ArtfightClient extends EventEmitter{
     /**
      * @param {string} username Username for login
      * @param {string} password Password for login
-     * @param {Function|undefined} callback Function that gets called after login
      * @param {Complete|Complete[]} completes Allowed types (made for better cpu performance), specifies which types to fetch completely.
      */
-    async login(username,password,callback,completes=Complete.None){
+    async login(username,password,completes=Complete.None){
         await this.scrapper.login(username,password);
         this.users=new UserManager(this,new Cache());
         this.attacks=new SubmitionManager(this,new Cache(),"attack");
@@ -55,9 +54,6 @@ class ArtfightClient extends EventEmitter{
         this.user=await new ClientUser(this,username).init();
         this.user.bookmarks=new BookmarkManager(this,new Cache());
         this.completes=completes;
-        if(callback!=undefined){
-            callback()
-        }
         this.emit("ready",this)
     }
 }

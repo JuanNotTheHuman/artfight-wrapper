@@ -1,5 +1,5 @@
 # Artfight
-Artfight is an annual art trading competition, to see more [Click here](https://artfight.net)<br>
+Artfight is an annual art trading competition, to see more [Click here](https://artfight.net){:target="_blank"}<br>
 This repository isn't in any way affiliated with artfight and is simply a fanmade project.
 # Contribute
 Feel free to suggest changes/code them yourself, if i think the code makes something more efficient or adds a useful feature, then i'll surely add it.
@@ -11,6 +11,6 @@ I won't add a option to submit an attack via code ever
 - More... there's always more...
 # Documentation
 [DOCUMENTATION.md](https://github.com/JuanNotTheHuman/Artfight/blob/main/DOCUMENTATION.md)
-# Used packages:
-- [node-cache](https://www.npmjs.com/package/node-cache)
-- [puppeteer](https://www.npmjs.com/package/puppeteer)
+# Used packages
+- [node-cache](https://www.npmjs.com/package/node-cache){:target="_blank"}
+- [puppeteer](https://www.npmjs.com/package/puppeteer){:target="_blank"}
