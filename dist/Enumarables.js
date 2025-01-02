@@ -9,7 +9,8 @@ var Complete;
     Complete[Complete["Comment"] = 2] = "Comment";
     Complete[Complete["User"] = 3] = "User";
     Complete[Complete["Submitions"] = 4] = "Submitions";
-    Complete[Complete["All"] = 5] = "All";
+    Complete[Complete["Messages"] = 5] = "Messages";
+    Complete[Complete["All"] = 6] = "All";
 })(Complete || (Complete = {}));
 ;
 /**
@@ -43,13 +44,21 @@ var ClientEvents;
      */
     ClientEvents["DefenseCacheUpdate"] = "defenseCacheUpdate";
     /**
-     * Emitted when the client is logged in (ready to receive commands)
+     * Emitted when the message cache is updated
+     */
+    ClientEvents["MessageCacheUpdate"] = "messageCacheUpdate";
+    /**
+     * Emitted when the client is logged in
      */
     ClientEvents["Ready"] = "ready";
     /**
-     * Emitted when tje client user is ready
+     * Emitted when the client user is ready
      */
     ClientEvents["ClientUserReady"] = "clientUserReady";
+    /**
+     * Emitted when the client user reveices a message
+     */
+    ClientEvents["MessageReceived"] = "messageReceived";
 })(ClientEvents || (ClientEvents = {}));
 /**
  * Names of events emitted by the task manager

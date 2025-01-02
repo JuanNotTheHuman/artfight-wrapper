@@ -7,6 +7,7 @@ import { SubmitionManager } from './sumbition.js';
 import { CharacterManager } from './character.js';
 import { Cache } from './manager.js';
 import { Complete } from './Enumarables.js';
+import { MessageManager } from './message.js';
 /**
  * @class ArtfightClient
  * @extends EventEmitter
@@ -41,6 +42,7 @@ class ArtfightClient extends EventEmitter {
      * Artfight's characters
      */
     characters;
+    messages;
     /**
      * Allowed types (made for better CPU performance), specifies which types to fetch completely.
      */
@@ -54,6 +56,7 @@ class ArtfightClient extends EventEmitter {
         this.attacks = {}; // Initialize as an empty object and cast to SubmitionManager
         this.defenses = {}; // Initialize as an empty object and cast to SubmitionManager
         this.characters = {}; // Initialize as an empty object and cast to CharacterManager
+        this.messages = {};
         this.completes = Complete.None; // Initialize with default value
     }
     /**
@@ -73,10 +76,14 @@ class ArtfightClient extends EventEmitter {
         this.characters = new CharacterManager(this, new Cache());
         this.members = new MemberManager(this, new Cache());
         this.user = await new ClientUser(this, username).init();
+        this.messages = new MessageManager(this, new Cache());
         this.completes = completes;
         this.emit(ClientEvents.Ready, this);
     }
     on(event, listener) {
+        if (event === ClientEvents.MessageReceived) {
+            this.scrapper.listenClientUserMessageReceived();
+        }
         return super.on(event, listener);
     }
     emit(event, ...args) {

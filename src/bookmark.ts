@@ -122,15 +122,6 @@ class BookmarkManager extends Manager{
      * @returns {Promise<BookmarkCharacter[]>} List of bookmarks in the specified range
      */
     async fetchRange(start:number,end:number){
-        interface BookmarkData {
-            id: string;
-            name: string;
-            icon: string;
-            owner: string;
-            description: string;
-            updated: string;
-            order: string;
-        }
         let bookmarks: BookmarkCharacter[] = (await this.client.scrapper.fetchClientUserBookmarksRange(start, end)).map((r: string[]) => {
             let [id, name, icon, owner, description, updated, order] = r;
             let bookmark = new BookmarkCharacter(id, name, icon, owner, description, updated, order);

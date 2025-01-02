@@ -8,6 +8,7 @@ import { CharacterManager } from './character.js';
 import { BookmarkManager } from './bookmark.js';
 import { Cache } from './manager.js';
 import { Complete } from './Enumarables.js';
+import { MessageManager } from './message.js';
 
 /**
  * @class ArtfightClient
@@ -43,6 +44,7 @@ class ArtfightClient extends EventEmitter {
    * Artfight's characters
    */
   characters: CharacterManager;
+  messages:MessageManager;
   /**
    * Allowed types (made for better CPU performance), specifies which types to fetch completely.
    */
@@ -57,6 +59,7 @@ class ArtfightClient extends EventEmitter {
     this.attacks = {} as SubmitionManager; // Initialize as an empty object and cast to SubmitionManager
     this.defenses = {} as SubmitionManager; // Initialize as an empty object and cast to SubmitionManager
     this.characters = {} as CharacterManager; // Initialize as an empty object and cast to CharacterManager
+    this.messages = {} as MessageManager;
     this.completes = Complete.None; // Initialize with default value
   }
 
@@ -77,10 +80,14 @@ class ArtfightClient extends EventEmitter {
     this.characters = new CharacterManager(this, new Cache());
     this.members = new MemberManager(this, new Cache());
     this.user = await new ClientUser(this, username).init();
+    this.messages = new MessageManager(this,new Cache());
     this.completes = completes;
     this.emit(ClientEvents.Ready, this);
   }
   on<Event extends keyof IClientEvents>(event: Event, listener: (...args: IClientEvents[Event]) => void): this {
+    if(event === ClientEvents.MessageReceived){
+      this.scrapper.listenClientUserMessageReceived();
+    }
     return super.on(event, listener);
   }
   emit<Event extends keyof IClientEvents>(event: Event, ...args: IClientEvents[Event]): boolean {

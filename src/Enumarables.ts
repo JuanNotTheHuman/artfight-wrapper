@@ -5,6 +5,7 @@ import { BookmarkCharacter } from "./bookmark.js";
 import { Member, User, ClientUser } from "./user.js";
 import { Character } from "./character.js";
 import { Submition } from "./sumbition.js";
+import { Message } from "./message.js";
 /**
  * @enum {number}
  */
@@ -14,6 +15,7 @@ enum Complete{
     Comment,
     User,
     Submitions,
+    Messages,
     All
 };
 /**
@@ -46,13 +48,22 @@ enum ClientEvents {
      */
     DefenseCacheUpdate = "defenseCacheUpdate",
     /**
-     * Emitted when the client is logged in (ready to receive commands)
+     * Emitted when the message cache is updated
+     */
+    MessageCacheUpdate="messageCacheUpdate",
+    /**
+     * Emitted when the client is logged in
      */
     Ready = "ready",
     /**
-     * Emitted when tje client user is ready
+     * Emitted when the client user is ready
      */
-    ClientUserReady="clientUserReady"
+    ClientUserReady="clientUserReady",
+
+    /**
+     * Emitted when the client user reveices a message
+     */
+    MessageReceived="messageReceived"
 }
 interface IClientEvents {
     [ClientEvents.BookmarkCacheUpdate]: [{ type: CacheUpdateTypes, value: (string | string[])|(BookmarkCharacter|BookmarkCharacter[]) }];
@@ -61,8 +72,10 @@ interface IClientEvents {
     [ClientEvents.CharacterCacheUpdate]: [{ type: CacheUpdateTypes, value: Character | Character[] }];
     [ClientEvents.AttackCacheUpdate]: [{ type: CacheUpdateTypes, value: Submition | Submition[] }];
     [ClientEvents.DefenseCacheUpdate]: [{ type: CacheUpdateTypes, value: Submition | Submition[] }];
+    [ClientEvents.MessageCacheUpdate]: [{type:CacheUpdateTypes, value: Message|Message[]}]
     [ClientEvents.Ready]: [client: ArtfightClient];
     [ClientEvents.ClientUserReady]: [user:ClientUser];
+    [ClientEvents.MessageReceived]: [message:Message];
 }
 /**
  * Names of events emitted by the task manager

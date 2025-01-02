@@ -62,15 +62,18 @@ class PageManager {
      * @param {Browser} browser The browser to manage the pages in
      */
     async init(browser) {
-        for (let i = 0; i < Config.maxpages - 1; i++) {
-            await browser.newPage();
-        }
-        let index = 0;
-        for (let page of await browser.pages()) {
-            let pageObject = { page, active: false, index };
-            this.pages[index] = pageObject;
-            index++;
-        }
+        return new Promise(async (resolve) => {
+            for (let i = 0; i < Config.maxpages - 1; i++) {
+                await browser.newPage();
+            }
+            let index = 0;
+            for (let page of await browser.pages()) {
+                let pageObject = { page, active: false, index };
+                this.pages[index] = pageObject;
+                index++;
+            }
+            resolve();
+        });
     }
     /**
      * @returns {Promise<{page: Page; active: boolean; index: number}>} An inactive page along with its index
@@ -78,7 +81,7 @@ class PageManager {
     async get() {
         return new Promise((resolve) => {
             const tryGetPage = () => {
-                let page = this.pages.find((r) => r.active === false);
+                let page = this.pages.find((r) => r.active == false);
                 if (page) {
                     let newPageObject = { page: page.page, index: page.index, active: true };
                     this.pages[page.index] = newPageObject;

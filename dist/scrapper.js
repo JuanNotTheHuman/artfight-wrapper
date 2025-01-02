@@ -2,7 +2,8 @@ import puppeteer from "puppeteer";
 import { Character, CharacterInformation } from "./character.js";
 import { PageManager, TaskManager } from "./task.js";
 import { Submition, SubmitionInformation, SubmitionStatistics } from "./sumbition.js";
-import { Complete } from "./Enumarables.js";
+import { ClientEvents, Complete } from "./Enumarables.js";
+import { Message } from "./message.js";
 class ArtfightScrapper {
     /**
      * @type {ArtfightClient}
@@ -17,7 +18,7 @@ class ArtfightScrapper {
      */
     constructor(client) {
         this.client = client;
-        this.pages = new PageManager();
+        this.pages = {};
     }
     /**
      * @param {string} username Artfight username
@@ -25,13 +26,9 @@ class ArtfightScrapper {
      * @returns {Promise<void>} Logs in the user
      */
     async login(username, password) {
-        let browser = await puppeteer.launch({ headless: true });
+        let browser = await puppeteer.launch({ headless: false });
         this.pages = new PageManager();
         await this.pages.init(browser);
-        /**
-         * @property {Page} page
-         * @property {number} index
-         */
         let pg = await this.pages.get();
         let page = pg.page;
         let index = pg.index;
@@ -43,11 +40,11 @@ class ArtfightScrapper {
         let redirect = page.waitForNavigation();
         await page.$eval("input[type=submit]", el => el.click());
         await redirect;
-        this.pages.return(index);
         let error = await page.$$(".alert-danger");
         if (error.length > 0) {
             throw new Error("Invalid login credentials");
         }
+        this.pages.return(index);
         return;
     }
     /**
@@ -71,6 +68,8 @@ class ArtfightScrapper {
             this.pages.return(index);
             return { lastseen: children[0].split(":")[1].trim(), joined: children[1].split(":")[1].trim(), team: children[2].split(":")[1].trim() };
         }
+        else
+            throw new Error("Element not found: .profile-header-normal-status");
     }
     /**
      * @param {string} username Nickname of the user
@@ -82,16 +81,18 @@ class ArtfightScrapper {
         let index = pg.index;
         await page.goto(`https://artfight.net/~${username}`);
         let parent = await page.waitForSelector(".icon-user");
-        this.pages.return(index);
         if (parent) {
             return parent.evaluate(r => {
                 const style = r.getAttribute("style");
                 if (style) {
                     return style.split(";")[1].replace("background-image: url(", "").replace(")", "").split("?")[0];
                 }
+                this.pages.return(index);
                 return null;
             });
         }
+        else
+            throw new Error("Element not found: .icon-user");
     }
     /**
      * @param {string|string[]} tags Tags for the character search
@@ -183,7 +184,7 @@ class ArtfightScrapper {
             });
             return { current: arr[1].map((value, index) => index == 0 ? value : parseFloat(value)), overall: arr[0].map(r => parseFloat(r).toString()), achivements: achv };
         });
-        await this.pages.return(index);
+        this.pages.return(index);
         return result;
     }
     /**
@@ -277,6 +278,7 @@ class ArtfightScrapper {
         if (!information) {
             throw new Error("Failed to fetch character information");
         }
+        this.pages.return(index);
         return new Character(x[0], x[1], created, images, description, permissions, attacks, new CharacterInformation(information[0], information[1], information[2] ? information[2] : undefined), tags, comments);
     }
     /**
@@ -304,7 +306,7 @@ class ArtfightScrapper {
                     }
                     return atks;
                 }) || [];
-                const manager = new TaskManager(this.pages.length);
+                const manager = new TaskManager();
                 attacks = [];
                 for (let link of links) {
                     manager.tasks.push(new Promise(async (r) => {
@@ -863,6 +865,124 @@ class ArtfightScrapper {
         });
         this.pages.return(index);
         return true;
+    }
+    /**
+     * @param {number} limit The maximum amount of messages to fetch
+     * @returns {Promise<Message[]>} List of messages
+     */
+    async fetchClientUserMessages(limit = 20) {
+        let fetched = 0;
+        let manager = new TaskManager();
+        let list = [];
+        for (let pageIndex = 0; pageIndex < Math.ceil(limit / 20); pageIndex++) {
+            manager.tasks.push(new Promise(async (resolve) => {
+                if (fetched > limit)
+                    resolve();
+                const { page, index } = await this.pages.get();
+                await page.goto(`https://artfight.net/messages?page=${pageIndex + 1}`);
+                let messages = await page.evaluate(() => {
+                    return Array.from(document.querySelectorAll("tbody tr")).map(r => {
+                        let id = r.children.item(0)?.children.item(0)?.value;
+                        if (!id)
+                            throw new Error("Message id not found");
+                        let subject = r.children.item(1)?.querySelector("a")?.innerText;
+                        if (!subject)
+                            throw new Error("Message subject not found");
+                        let from = r.children.item(2)?.textContent?.trim();
+                        if (!from)
+                            throw new Error("Message sender not found");
+                        let date = r.children.item(3)?.textContent?.trim();
+                        if (!date)
+                            throw new Error("Message send date not found");
+                        return { id, subject, from, date };
+                    });
+                });
+                if (fetched + messages.length > limit) {
+                    messages = messages.slice(0, limit - fetched);
+                    fetched = limit;
+                }
+                else {
+                    fetched += messages.length;
+                }
+                list.push(...messages);
+                this.pages.return(index);
+                resolve();
+            }));
+        }
+        await manager.execute();
+        manager = new TaskManager();
+        if (![Complete.All, Complete.Messages].includes(this.client.completes)) {
+            return list.map(r => new Message(r.id, r.subject, r.from, r.date));
+        }
+        for (let i = 0; i < list.length; i++) {
+            manager.tasks.push(new Promise(async (resolve) => {
+                const { page, index } = await this.pages.get();
+                await page.goto(`https://artfight.net/message/${list[i].id}`);
+                const description = await page.evaluate(() => {
+                    const element = document.querySelector(".card-body.well-lg");
+                    return element ? element.textContent?.trim() : '';
+                });
+                list[i].description = description;
+                this.pages.return(index);
+                resolve();
+            }));
+        }
+        await manager.execute();
+        return list.map(r => new Message(r.id, r.subject, r.from, r.date, r.description));
+    }
+    /**
+     * Listens for new messages received by the client user.
+     */
+    async listenClientUserMessageReceived() {
+        try {
+            const { page, index } = await this.pages.get();
+            await page.goto("https://artfight.net/messages");
+            let lastMessageTimestamp = await page.evaluate(() => {
+                return document.querySelector("tbody tr")?.children.item(3)?.textContent?.trim() || "";
+            });
+            setInterval(async () => {
+                await page.reload();
+                const newMessages = await page.evaluate((lastTimestamp) => {
+                    const rows = Array.from(document.querySelectorAll("tbody tr"));
+                    const newMessages = [];
+                    const lastTimestampDate = new Date(lastTimestamp);
+                    for (const row of rows) {
+                        const dateText = row.children.item(3)?.textContent?.trim();
+                        if (dateText) {
+                            const date = new Date(dateText);
+                            if (date > lastTimestampDate) {
+                                const id = row.children.item(0)?.children.item(0)?.value;
+                                if (!id)
+                                    throw new Error("Message id not found");
+                                const subject = row.children.item(1)?.querySelector("a")?.innerText;
+                                if (!subject)
+                                    throw new Error("Message subject not found");
+                                const from = row.children.item(2)?.textContent?.trim();
+                                if (!from)
+                                    throw new Error("Message sender not found");
+                                newMessages.push({ id, subject, from, date: dateText, description: "" });
+                            }
+                        }
+                    }
+                    return newMessages;
+                }, lastMessageTimestamp);
+                for (const message of newMessages) {
+                    await page.goto(`https://artfight.net/message/${message.id}`);
+                    const description = await page.evaluate(() => {
+                        const element = document.querySelector(".card-body.well-lg");
+                        return element ? element.textContent?.trim() : '';
+                    });
+                    message.description = description ?? '';
+                    this.client.emit(ClientEvents.MessageReceived, message);
+                }
+                if (newMessages.length > 0) {
+                    lastMessageTimestamp = newMessages[0].date;
+                }
+            }, 10000);
+        }
+        catch (error) {
+            console.error("Error in listenClientUserMessageReceived:", error);
+        }
     }
 }
 export { ArtfightScrapper };
