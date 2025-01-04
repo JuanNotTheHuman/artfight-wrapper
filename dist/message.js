@@ -1,21 +1,16 @@
 import { CacheUpdateTypes, ClientEvents } from "./Enumarables.js";
 import { Manager } from "./manager.js";
-class MessagePartial {
+class Message {
     id;
     subject;
     from;
     date;
-    constructor(id, subject, from, date) {
+    description;
+    constructor(id, subject, from, date, description) {
         this.id = id;
         this.subject = subject;
         this.from = from;
         this.date = date;
-    }
-}
-class Message extends MessagePartial {
-    description;
-    constructor(id, subject, from, date, description) {
-        super(id, subject, from, date);
         this.description = description;
     }
 }
@@ -27,6 +22,8 @@ class MessageManager extends Manager {
     }
     /**
      * @param {number} limit
+     * @emits ClientEvents.MessageCacheUpdate
+     * @returns {Promise<Message[]>}
      */
     async fetch(limit = 5) {
         let messages = await this.client.scrapper.fetchClientUserMessages(limit);
@@ -43,4 +40,4 @@ class MessageManager extends Manager {
         return messages;
     }
 }
-export { MessageManager, MessagePartial, Message };
+export { MessageManager, Message };

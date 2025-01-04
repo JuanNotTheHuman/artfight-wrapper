@@ -1,10 +1,15 @@
 import { ArtfightClient } from './client.js';
 import { CacheUpdateTypes,ClientEvents} from './Enumarables.js';
 import { Cache, Manager } from './manager.js';
-interface SubmitionPartial{
+class SubmitionPartial{
   icon:string;
   title:string;
   link:string;
+  constructor(icon:string,title:string,link:string){
+      this.icon=icon;
+      this.title=title;
+      this.link=link;
+  }
 }
 class Submition{
   /**

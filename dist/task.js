@@ -28,6 +28,8 @@ class TaskManager extends EventEmitter {
     }
     /**
      * Executes all of the manager's tasks in batches
+     * @returns {Promise<void>}
+     * @emits TaskManager#executionStep
      */
     async execute() {
         let arr = this.chunk(this.tasks, this.limit);
@@ -60,6 +62,7 @@ class PageManager {
     }
     /**
      * @param {Browser} browser The browser to manage the pages in
+     * @returns {Promise<void>} Initializes the manager
      */
     async init(browser) {
         return new Promise(async (resolve) => {
@@ -79,8 +82,11 @@ class PageManager {
      * @returns {Promise<{page: Page; active: boolean; index: number}>} An inactive page along with its index
      */
     async get() {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             const tryGetPage = () => {
+                if (this.pages.length == 0) {
+                    reject('PageManager has not been initialized or maxpages is set to 0');
+                }
                 let page = this.pages.find((r) => r.active == false);
                 if (page) {
                     let newPageObject = { page: page.page, index: page.index, active: true };

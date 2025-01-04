@@ -4,11 +4,17 @@ import { Manager, Cache } from "./manager.js";
 import { Submition } from "./sumbition.js";
 import { CacheUpdateTypes, ClientEvents } from "./Enumarables.js";
 import { BookmarkCharacter } from "./bookmark.js";
-interface CharacterPartial{
+class CharacterPartial{
     icon:string;
     name:string;
     link:string;
     id:string;
+    constructor(icon:string,name:string,link:string,id:string){
+        this.icon = icon;
+        this.name = name;
+        this.link = link;
+        this.id = id;
+    }
 }
 class Character {
     /**

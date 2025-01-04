@@ -1,5 +1,17 @@
 import { Manager } from "./manager.js";
 import { CacheUpdateTypes, ClientEvents } from "./Enumarables.js";
+class CharacterPartial {
+    icon;
+    name;
+    link;
+    id;
+    constructor(icon, name, link, id) {
+        this.icon = icon;
+        this.name = name;
+        this.link = link;
+        this.id = id;
+    }
+}
 class Character {
     /**
      * Identification index of the character
@@ -58,6 +70,8 @@ class Character {
      * @param client The Artfight client
      * @param order Order of the character
      * @param description Description of the bookmark `(not working)`
+     * @emits ClientEvents.BookmarkCacheUpdate
+     * @returns {Promise<boolean>} Returns true if the character was bookmarked
      */
     async bookmark(client, order, description) {
         await client.scrapper.bookmarkCharacter(this.id, order, description);
@@ -65,6 +79,7 @@ class Character {
             client.user.bookmarks.cache.set(this.id, this);
             client.emit(ClientEvents.BookmarkCacheUpdate, { type: CacheUpdateTypes.Add, value: client.user.bookmarks.cache.get(this.id) });
         }
+        return client.user.bookmarks.cache.has(this.id);
     }
     /**
      * Unbookmarks the character
@@ -78,7 +93,7 @@ class Character {
         }
     }
     /**
-     * Link to the character
+     * @returns {string} The link to the character's Artfight page
      */
     link() {
         return `https://artfight.net/character/${this.id}.${this.name}`;
@@ -117,6 +132,8 @@ class CharacterManager extends Manager {
     /**
      * Fetches all of the User's characters
      * @param username The User's username
+     * @emits ClientEvents.CharacterCacheUpdate
+     * @returns {Promise<Character[]>} The User's characters
      */
     async fetch(username) {
         let characters = await this.client.scrapper.fetchUserCharacters(username);
@@ -127,6 +144,8 @@ class CharacterManager extends Manager {
     /**
      * Fetches a character by its identification index
      * @param id The character's identification index
+     * @emits ClientEvents.CharacterCacheUpdate
+     * @returns {Promise<Character>} The character
      */
     async fetchById(id) {
         let character = await this.client.scrapper.fetchUserCharacter(`https://artfight.net/character/${id}`);
@@ -144,6 +163,8 @@ class CharacterManager extends Manager {
     }
     /**
      * Fetches a random character
+     * @emits ClientEvents.CharacterCacheUpdate
+     * @returns {Promise<Character>} A random character
      */
     async random() {
         let character = await this.client.scrapper.fetchRandomCharacter();
@@ -163,6 +184,8 @@ class CharacterManager extends Manager {
      * Searches for characters by tags
      * @param tags Character tags
      * @param limit Maximum amount of characters returned
+     * @emits ClientEvents.CharacterCacheUpdate
+     * @returns {Promise<Character[]>} List of characters
      */
     async tagSearch(tags, limit) {
         let characters = await this.client.scrapper.fetchCharactersByTag(tags, limit);
@@ -177,4 +200,4 @@ class CharacterManager extends Manager {
         return characters;
     }
 }
-export { CharacterManager, Character, CharacterInformation };
+export { CharacterManager, Character, CharacterInformation, CharacterPartial };

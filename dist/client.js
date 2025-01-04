@@ -2,12 +2,13 @@
 import { EventEmitter } from 'events';
 import { ArtfightScrapper } from './scrapper.js';
 import { ClientEvents } from './Enumarables.js';
-import { ClientUser, UserManager, MemberManager } from './user.js';
+import { ClientUser, UserManager } from './user.js';
 import { SubmitionManager } from './sumbition.js';
 import { CharacterManager } from './character.js';
 import { Cache } from './manager.js';
 import { Complete } from './Enumarables.js';
 import { MessageManager } from './message.js';
+import { ArtfightBrowse } from './browse.js';
 /**
  * @class ArtfightClient
  * @extends EventEmitter
@@ -29,7 +30,6 @@ class ArtfightClient extends EventEmitter {
     /**
      * Artfight's members
      */
-    members;
     /**
      * Artfight's attacks
      */
@@ -42,31 +42,37 @@ class ArtfightClient extends EventEmitter {
      * Artfight's characters
      */
     characters;
+    /**
+     * Artfight's messages
+     */
     messages;
     /**
      * Allowed types (made for better CPU performance), specifies which types to fetch completely.
      */
     completes;
+    /**
+     * Artfight's browse feature
+     */
+    browse;
     constructor() {
         super();
         this.scrapper = new ArtfightScrapper(this);
         this.user = {};
         this.users = {};
-        this.members = {};
         this.attacks = {};
         this.defenses = {};
         this.characters = {};
         this.messages = {};
+        this.browse = {};
         this.completes = Complete.None;
     }
     /**
      * Logs in the user and initializes the Artfight client.
      * Emits a `Ready` event when the client is ready.
-     *
      * @param {string} username - Username for login
      * @param {string} password - Password for login
      * @param {Complete|Complete[]} completes - Allowed types (made for better CPU performance), specifies which types to fetch completely.
-     * @fires ClientEvents.Ready - Emitted when the client is ready and logged in
+     * @emits ClientEvents.Ready - Emitted when the client is ready and logged in
      */
     async login(username, password, completes = Complete.None) {
         await this.scrapper.login(username, password);
@@ -74,10 +80,10 @@ class ArtfightClient extends EventEmitter {
         this.attacks = new SubmitionManager(this, new Cache(), "attack");
         this.defenses = new SubmitionManager(this, new Cache(), "defense");
         this.characters = new CharacterManager(this, new Cache());
-        this.members = new MemberManager(this, new Cache());
         this.user = await new ClientUser(this, username).init();
         this.messages = new MessageManager(this, new Cache());
         this.completes = completes;
+        this.browse = new ArtfightBrowse(this);
         this.emit(ClientEvents.Ready, this);
     }
     on(event, listener) {

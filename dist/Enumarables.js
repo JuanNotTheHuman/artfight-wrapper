@@ -40,6 +40,14 @@ var ClientEvents;
      */
     ClientEvents["AttackCacheUpdate"] = "attackCacheUpdate";
     /**
+     * Emitted when the browse attack cache is updated
+     */
+    ClientEvents["BrowseAttackCacheUpdate"] = "browseAttackCacheUpdate";
+    /**
+     * Emitted when the browse character cache is updated
+     */
+    ClientEvents["BrowseCharacterCacheUpdate"] = "browseCharacterCacheUpdate";
+    /**
      * Emitted when the defense cache is updated
      */
     ClientEvents["DefenseCacheUpdate"] = "defenseCacheUpdate";

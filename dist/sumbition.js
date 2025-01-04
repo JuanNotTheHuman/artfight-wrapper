@@ -1,5 +1,15 @@
 import { CacheUpdateTypes, ClientEvents } from './Enumarables.js';
 import { Manager } from './manager.js';
+class SubmitionPartial {
+    icon;
+    title;
+    link;
+    constructor(icon, title, link) {
+        this.icon = icon;
+        this.title = title;
+        this.link = link;
+    }
+}
 class Submition {
     /**
      * @type {SubmitionInformation} Information about the submition
@@ -111,6 +121,7 @@ class SubmitionManager extends Manager {
     /**
      * @param {string} username The user's username
      * @param {number} [limit=5] Max amount of submitions fetched
+     * @emits ClientEvents.AttackCacheUpdate|ClientEvents.DefenseCacheUpdate
      * @returns {Promise<Submition[]>}
      */
     async fetch(username, limit = 5) {
@@ -244,4 +255,4 @@ class SubmitionCharacter {
         this.link = link;
     }
 }
-export { Submition, Revenge, SubmitionManager, SubmitionInformation, SubmitionStatistics, SubmitionCharacter };
+export { Submition, Revenge, SubmitionManager, SubmitionInformation, SubmitionStatistics, SubmitionCharacter, SubmitionPartial };

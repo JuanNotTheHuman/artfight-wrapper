@@ -135,6 +135,9 @@ class User {
         this.defenses = this.client.defenses;
         this.characters = this.client.characters;
     }
+    /**
+     * @returns {string} The link to the user's Artfight page
+     */
     link() {
         return `https://artfight.net/~${this.username}`;
     }
@@ -151,6 +154,7 @@ class ClientUser extends User {
     /**
      * Initializes the client's user
      * @returns {Promise<ClientUser>} The client's user
+     * @emits ClientEvents.ClientUserReady
      */
     async init() {
         let user = await this.client.users.fetch(this.username);
@@ -160,6 +164,12 @@ class ClientUser extends User {
         this.comments = user.comments;
         this.client.emit(ClientEvents.ClientUserReady, this);
         return this;
+    }
+    /**
+     * @returns {Promise<void>} Logs out the user
+     */
+    async logout() {
+        return await this.client.scrapper.logout();
     }
 }
 class UserManager extends Manager {
@@ -174,6 +184,7 @@ class UserManager extends Manager {
     /**
      * @param {string} username User's nickname
      * @returns {Promise<User>} The user with the given nickname
+     * @emits ClientEvents.UserCacheUpdate
      */
     async fetch(username) {
         const user = new User(this.client, username);
@@ -191,7 +202,7 @@ class UserManager extends Manager {
             r();
         }), new Promise(async (r) => {
             let { current, overall, achivements } = await this.client.scrapper.fetchUserStatistics(username);
-            user.statistics = new UserStatistics(new BattleStatistics(Number(overall[0]), Number(overall[1]), Number(overall[2]), Number(overall[3]), Number(overall[4]), overall[5] ? Number(overall[5]) : undefined, overall[6] ? Number(overall[6]) : undefined, overall[7] ? Number(overall[7]) : undefined), new BattleStatistics(Number(current[1]), Number(current[2]), Number(current[3]), Number(current[4]), Number(current[5]), current[6] ? Number(current[6]) : undefined, current[7] ? Number(current[7]) : undefined, current[8] ? Number(current[8]) : undefined), achivements.map(a => a[1]));
+            user.statistics = new UserStatistics(new BattleStatistics(Number(overall[0]), Number(overall[1]), Number(overall[2]), Number(overall[3]), Number(overall[4]), overall[5] ? Number(overall[5]) : undefined, overall[6] ? Number(overall[6]) : undefined, overall[7] ? Number(overall[7]) : undefined), new BattleStatistics(Number(current[1]), Number(current[2]), Number(current[3]), Number(current[4]), Number(current[5]), Number(current[6]), Number(current[7]), Number(current[8])), achivements.map(a => a[1]));
             r();
         }), new Promise(async (r) => {
             let pg = await this.client.scrapper.pages.get();
@@ -211,11 +222,13 @@ class UserManager extends Manager {
     }
     /**
      * @returns {Promise<User>} A random user
+     * @emits ClientEvents.UserCacheUpdate
      */
     async random() {
         let user = await this.fetch(await this.client.scrapper.fetchRandomUsername());
         if (!this.cache.has(user.username)) {
             this.cache.set(user.username, user);
+            this.client.emit(ClientEvents.UserCacheUpdate, { type: CacheUpdateTypes.Add, value: user });
         }
         return user;
     }
@@ -255,6 +268,7 @@ class MemberManager extends Manager {
     }
     /**
      * @param {number} limit Maximum amount of members fetched
+     * @emits ClientEvents.MemberCacheUpdate
      * @returns {Promise<Member[]>} List of members
      */
     async fetch(limit) {

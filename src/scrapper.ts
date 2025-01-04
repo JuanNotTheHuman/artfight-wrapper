@@ -186,7 +186,6 @@ class ArtfightScrapper{
             })
             return {current:arr[1].map((value,index)=>index==0?value:parseFloat(value)),overall:arr[0].map(r=>parseFloat(r).toString()),achivements:achv};
         })
-        console.log(result);
         this.pages.return(index);
         return result;
     }
@@ -999,11 +998,11 @@ class ArtfightScrapper{
                     const secondChild = firstChild.children.item(0);
                     if (!secondChild) return null;
                     let data = secondChild.children;
-                    return {icon:(data.item(0) as HTMLAnchorElement)?.href, title:data.item(1)?.textContent,link:(data.item(1) as HTMLAnchorElement)?.href}
+                    return {icon:(data.item(0)?.children.item(0) as HTMLImageElement)?.src, title:data.item(1)?.textContent,link:(data.item(1)?.children.item(0) as HTMLAnchorElement)?.href}
                 }).filter(r => r !== null)
-            })) as SubmitionPartial[];
+            }));
             this.pages.return(index);
-            return attacks;
+            return attacks.map(r=>new SubmitionPartial(r.icon,r.title||"",r.link));
         }
         /**
          * @param {number} limit The maximum amount of characters to fetch **(not implemented)**
@@ -1019,11 +1018,15 @@ class ArtfightScrapper{
                     const secondChild = firstChild.children.item(0);
                     if (!secondChild) return null;
                     let data = secondChild.children;
-                    return {icon:(data.item(0) as HTMLAnchorElement)?.href, name:data.item(1)?.textContent,link:(data.item(1) as HTMLAnchorElement)?.href, id:(data.item(1) as HTMLAnchorElement)?.href.split("/")[-1].split(".")[-1]}
+                    let icon = ((data.item(0) as HTMLAnchorElement)?.children.item(0) as HTMLImageElement).src;
+                    let name = (data.item(1) as HTMLAnchorElement)?.textContent;
+                    let id = (data.item(1)?.children.item(0) as HTMLAnchorElement)?.href.split("/").pop()?.split(".")[0];
+                    let link = (data.item(1)?.children.item(0) as HTMLAnchorElement)?.href
+                    return {icon, name,link, id}
                 }).filter(r => r !== null)
             })) as CharacterPartial[];
             this.pages.return(index);
-            return characters;
+            return characters.map(r=>new CharacterPartial(r.icon,r.name,r.link,r.id));
         }
 }
 export{ArtfightScrapper};

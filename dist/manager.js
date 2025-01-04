@@ -32,14 +32,12 @@ class Cache extends NodeCache {
         }
         const existingValues = this.get(key) || [];
         this.set(key, existingValues.concat(values));
-        this.emit('valueAdded', { key, values });
     }
     /**
      * @param {Key} key The key to cache
      * @returns {number} Amount of keys deleted
      */
     delete(key) {
-        this.emit('valueDeleted', { key });
         return this.del(key);
     }
 }
