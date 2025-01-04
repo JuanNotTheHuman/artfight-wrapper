@@ -9,6 +9,7 @@ import { BookmarkManager } from './bookmark.js';
 import { Cache } from './manager.js';
 import { Complete } from './Enumarables.js';
 import { MessageManager } from './message.js';
+import { ArtfightBrowse } from './browse.js';
 
 /**
  * @class ArtfightClient
@@ -31,7 +32,6 @@ class ArtfightClient extends EventEmitter {
   /**
    * Artfight's members
    */
-  members: MemberManager;
   /**
    * Artfight's attacks
    */
@@ -44,33 +44,38 @@ class ArtfightClient extends EventEmitter {
    * Artfight's characters
    */
   characters: CharacterManager;
+  /**
+   * Artfight's messages
+   */
   messages:MessageManager;
   /**
    * Allowed types (made for better CPU performance), specifies which types to fetch completely.
    */
   completes: Complete | Complete[];
-
+  /**
+   * Artfight's browse feature
+   */
+  browse: ArtfightBrowse;
   constructor() {
     super();
     this.scrapper = new ArtfightScrapper(this);
-    this.user = {} as ClientUser; // Initialize as an empty object and cast to ClientUser
-    this.users = {} as UserManager; // Initialize as an empty object and cast to UserManager
-    this.members = {} as MemberManager; // Initialize as an empty object and cast to MemberManager
-    this.attacks = {} as SubmitionManager; // Initialize as an empty object and cast to SubmitionManager
-    this.defenses = {} as SubmitionManager; // Initialize as an empty object and cast to SubmitionManager
-    this.characters = {} as CharacterManager; // Initialize as an empty object and cast to CharacterManager
+    this.user = {} as ClientUser;
+    this.users = {} as UserManager;
+    this.attacks = {} as SubmitionManager;
+    this.defenses = {} as SubmitionManager;
+    this.characters = {} as CharacterManager;
     this.messages = {} as MessageManager;
-    this.completes = Complete.None; // Initialize with default value
+    this.browse = {} as ArtfightBrowse;
+    this.completes = Complete.None;
   }
 
   /**
    * Logs in the user and initializes the Artfight client.
    * Emits a `Ready` event when the client is ready.
-   * 
    * @param {string} username - Username for login
    * @param {string} password - Password for login
    * @param {Complete|Complete[]} completes - Allowed types (made for better CPU performance), specifies which types to fetch completely.
-   * @fires ClientEvents.Ready - Emitted when the client is ready and logged in
+   * @emits ClientEvents.Ready - Emitted when the client is ready and logged in
    */
   async login(username: string, password: string, completes: Complete | Complete[] = Complete.None): Promise<void> {
     await this.scrapper.login(username, password);
@@ -78,10 +83,10 @@ class ArtfightClient extends EventEmitter {
     this.attacks = new SubmitionManager(this, new Cache(), "attack");
     this.defenses = new SubmitionManager(this, new Cache(), "defense");
     this.characters = new CharacterManager(this, new Cache());
-    this.members = new MemberManager(this, new Cache());
     this.user = await new ClientUser(this, username).init();
     this.messages = new MessageManager(this,new Cache());
     this.completes = completes;
+    this.browse = new ArtfightBrowse(this);
     this.emit(ClientEvents.Ready, this);
   }
   on<Event extends keyof IClientEvents>(event: Event, listener: (...args: IClientEvents[Event]) => void): this {

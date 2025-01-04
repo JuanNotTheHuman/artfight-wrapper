@@ -58,19 +58,17 @@ class BookmarkCharacter{
     /**
      * Removes the bookmark from Artfight
      * @param {ArtfightClient} client The Artfight client
+     * @emits ClientEvents.BookmarkCacheUpdate
      * @returns {Promise<void>} Unbookmarks the character
      */
     async remove(client:ArtfightClient){
         await client.scrapper.unbookmarkCharacter(this.id);
         if(client.user.bookmarks.cache.has(this.id)){
             client.user.bookmarks.cache.delete(this.id);
+            client.emit(ClientEvents.BookmarkCacheUpdate,{type:CacheUpdateTypes.Delete,value:this.id})
         }
     }
 }
-/**
- * @class BookmarkManager
- * @extends Manager
- */
 class BookmarkManager extends Manager{
     /**
      * @type {ArtfightClient} The Artfight client           
@@ -87,6 +85,7 @@ class BookmarkManager extends Manager{
     /**
      * Fetches bookmarks from Artfight
      * @param {number} limit Maximum amount of bookmarks returned
+     * @emits ClientEvents.BookmarkCacheUpdate
      * @return {Promise<BookmarkCharacter[]>} List of bookmarks
      */
     async fetch(limit:number){
@@ -104,6 +103,7 @@ class BookmarkManager extends Manager{
     /**
      * Fetches a bookmark from Artfight at the specified index starting from 0
      * @param {number} index Index of the bookmark to be fetched starting from 0
+     * @emits ClientEvents.BookmarkCacheUpdate
      * @returns {Promise<BookmarkCharacter>} The bookmark at the specified index
      */
     async fetchIndex(index:number){
@@ -119,6 +119,7 @@ class BookmarkManager extends Manager{
      * Fetches a range of bookmarks from Artfight
      * @param {number} start The starting index of the range of bookmarks to be fetched
      * @param {number} end The ending index of the range of bookmarks to be fetched
+     * @emits ClientEvents.BookmarkCacheUpdate
      * @returns {Promise<BookmarkCharacter[]>} List of bookmarks in the specified range
      */
     async fetchRange(start:number,end:number){
@@ -135,6 +136,7 @@ class BookmarkManager extends Manager{
     /**
      * Removes bookmarks from both cache and Artfight
      * @param {number} amount Amount of bookmarks to be removed, starting from beggining
+     * @emits ClientEvents.BookmarkCacheUpdate
      * @returns {Promise<string[]>} List of identification indexes of removed bookmarks
      */
     async remove(amount:number){
@@ -148,6 +150,7 @@ class BookmarkManager extends Manager{
     /**
      * Removes the bookmark at the specified index from cache and Artfight
      * @param {string} id Identification index of bookmark's character to be removed
+     * @emits ClientEvents.BookmarkCacheUpdate
      * @return {Promise<boolean>} Whether the bookmark was removed successfully
      */
     async removeCharacterById(id:string){

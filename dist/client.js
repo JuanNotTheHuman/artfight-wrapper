@@ -50,14 +50,14 @@ class ArtfightClient extends EventEmitter {
     constructor() {
         super();
         this.scrapper = new ArtfightScrapper(this);
-        this.user = {}; // Initialize as an empty object and cast to ClientUser
-        this.users = {}; // Initialize as an empty object and cast to UserManager
-        this.members = {}; // Initialize as an empty object and cast to MemberManager
-        this.attacks = {}; // Initialize as an empty object and cast to SubmitionManager
-        this.defenses = {}; // Initialize as an empty object and cast to SubmitionManager
-        this.characters = {}; // Initialize as an empty object and cast to CharacterManager
+        this.user = {};
+        this.users = {};
+        this.members = {};
+        this.attacks = {};
+        this.defenses = {};
+        this.characters = {};
         this.messages = {};
-        this.completes = Complete.None; // Initialize with default value
+        this.completes = Complete.None;
     }
     /**
      * Logs in the user and initializes the Artfight client.

@@ -1,7 +1,11 @@
 import { ArtfightClient } from './client.js';
 import { CacheUpdateTypes,ClientEvents} from './Enumarables.js';
 import { Cache, Manager } from './manager.js';
-
+interface SubmitionPartial{
+  icon:string;
+  title:string;
+  link:string;
+}
 class Submition{
   /**
    * @type {SubmitionInformation} Information about the submition
@@ -115,6 +119,7 @@ class SubmitionManager extends Manager{
   /**
    * @param {string} username The user's username
    * @param {number} [limit=5] Max amount of submitions fetched
+   * @emits ClientEvents.AttackCacheUpdate|ClientEvents.DefenseCacheUpdate
    * @returns {Promise<Submition[]>}
    */
   async fetch(username: string, limit: number = 5): Promise<Submition[]> {
@@ -249,4 +254,4 @@ class SubmitionCharacter{
   }
 }
 
-export { Submition, Revenge, SubmitionManager, SubmitionInformation, SubmitionStatistics, SubmitionCharacter };
+export { Submition, Revenge, SubmitionManager, SubmitionInformation, SubmitionStatistics, SubmitionCharacter,SubmitionPartial };

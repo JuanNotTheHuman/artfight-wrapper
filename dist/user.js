@@ -153,17 +153,11 @@ class ClientUser extends User {
      * @returns {Promise<ClientUser>} The client's user
      */
     async init() {
-        const manager = new TaskManager();
-        let user = new User(this.client, this.username);
-        manager.tasks.push(new Promise(async (r) => {
-            user = await this.client.users.fetch(this.username);
-            r();
-        }));
+        let user = await this.client.users.fetch(this.username);
         this.statistics = user.statistics;
         this.avatar = user.avatar;
         this.status = user.status;
         this.comments = user.comments;
-        await manager.execute();
         this.client.emit(ClientEvents.ClientUserReady, this);
         return this;
     }
@@ -197,7 +191,7 @@ class UserManager extends Manager {
             r();
         }), new Promise(async (r) => {
             let { current, overall, achivements } = await this.client.scrapper.fetchUserStatistics(username);
-            user.statistics = new UserStatistics(new BattleStatistics(Number(overall[0]), Number(overall[1]), Number(overall[2]), Number(overall[3]), Number(overall[4]), overall[5] ? Number(overall[5]) : undefined, overall[6] ? Number(overall[6]) : undefined, overall[7] ? Number(overall[7]) : undefined), new BattleStatistics(Number(current[0]), Number(current[1]), Number(current[2]), Number(current[3]), Number(current[4]), current[5] ? Number(current[5]) : undefined, current[6] ? Number(current[6]) : undefined, current[7] ? Number(current[7]) : undefined), achivements.map(a => a[1]));
+            user.statistics = new UserStatistics(new BattleStatistics(Number(overall[0]), Number(overall[1]), Number(overall[2]), Number(overall[3]), Number(overall[4]), overall[5] ? Number(overall[5]) : undefined, overall[6] ? Number(overall[6]) : undefined, overall[7] ? Number(overall[7]) : undefined), new BattleStatistics(Number(current[1]), Number(current[2]), Number(current[3]), Number(current[4]), Number(current[5]), current[6] ? Number(current[6]) : undefined, current[7] ? Number(current[7]) : undefined, current[8] ? Number(current[8]) : undefined), achivements.map(a => a[1]));
             r();
         }), new Promise(async (r) => {
             let pg = await this.client.scrapper.pages.get();

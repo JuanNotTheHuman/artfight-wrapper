@@ -20,14 +20,12 @@ class UserStatus {
      * The user's current team
      */
     team: string;
-
     constructor(lastseen: string, joined: string, team: string) {
         this.lastseen = lastseen;
         this.joined = joined;
         this.team = team;
     }
 }
-
 class BattleStatistics {
     /**
      * The attack to defense ratio of the user
@@ -61,17 +59,8 @@ class BattleStatistics {
      * Amount of characters posted by the user
      */
     characters?: number;
-
-    constructor(
-        ratio: number,
-        points: number,
-        attacks: number,
-        friendlyfire: number,
-        defenses: number,
-        characters?: number,
-        followers?: number,
-        following?: number
-    ) {
+    constructor(ratio: number,points: number,attacks: number,friendlyfire: number,defenses: number,characters?: number,followers?: number,following?: number)
+    {
         this.ratio = ratio;
         this.points = points;
         this.attacks = attacks;
@@ -88,7 +77,6 @@ class BattleStatistics {
         }
     }
 }
-
 class UserStatistics {
     /**
      * Overall battle statistics
@@ -102,14 +90,12 @@ class UserStatistics {
      * User's achievements
      */
     achievements: string[];
-
     constructor(overall: BattleStatistics, current: BattleStatistics, achievements: string[]) {
         this.overall = overall;
         this.current = current;
         this.achievements = achievements;
     }
 }
-
 class User {
     /**
      * The Artfight client
@@ -147,7 +133,6 @@ class User {
      * Comments made on the user's page
      */
     comments?: Comment[];
-
     constructor(client: ArtfightClient, username: string) {
         this.client = client;
         this.username = username;
@@ -155,12 +140,13 @@ class User {
         this.defenses = this.client.defenses;
         this.characters = this.client.characters;
     }
-
+    /**
+     * @returns {string} The link to the user's Artfight page
+     */
     link(): string {
         return `https://artfight.net/~${this.username}`;
     }
 }
-
 class ClientUser extends User {
     /**
      * The logged in user's bookmark manager
@@ -170,44 +156,40 @@ class ClientUser extends User {
         super(client, username);
         this.bookmarks = new BookmarkManager(client, new Cache());
     }
-
     /**
      * Initializes the client's user
      * @returns {Promise<ClientUser>} The client's user
+     * @emits ClientEvents.ClientUserReady
      */
     async init(): Promise<ClientUser> {
-        const manager = new TaskManager();
-        let user: User = new User(this.client, this.username);
-        manager.tasks.push(
-            new Promise<void>(async (r) => {
-                user = await this.client.users.fetch(this.username);
-                r();
-            })
-        );
+        let user: User = await this.client.users.fetch(this.username);
         this.statistics=user.statistics;
         this.avatar=user.avatar;
         this.status=user.status;
         this.comments=user.comments;
-        await manager.execute();
         this.client.emit(ClientEvents.ClientUserReady, this);
         return this;
     }
+    /**
+     * @returns {Promise<void>} Logs out the user
+     */
+    async logout(){
+        return await this.client.scrapper.logout();
+    }
 }
-
 class UserManager extends Manager {
     /**
      * The Artfight client
      */
     client: ArtfightClient;
-
     constructor(client: ArtfightClient, cache: Cache) {
         super(cache);
         this.client = client;
     }
-
     /**
      * @param {string} username User's nickname
      * @returns {Promise<User>} The user with the given nickname
+     * @emits ClientEvents.UserCacheUpdate
      */
     async fetch(username: string): Promise<User> {
         const user = new User(this.client, username);
@@ -229,26 +211,8 @@ class UserManager extends Manager {
             new Promise<void>(async (r) => {
                 let { current, overall, achivements } = await this.client.scrapper.fetchUserStatistics(username);
                 user.statistics = new UserStatistics(
-                    new BattleStatistics(
-                        Number(overall[0]), 
-                        Number(overall[1]), 
-                        Number(overall[2]), 
-                        Number(overall[3]), 
-                        Number(overall[4]), 
-                        overall[5] ? Number(overall[5]) : undefined, 
-                        overall[6] ? Number(overall[6]) : undefined, 
-                        overall[7] ? Number(overall[7]) : undefined
-                    ),
-                    new BattleStatistics(
-                        Number(current[0]), 
-                        Number(current[1]), 
-                        Number(current[2]), 
-                        Number(current[3]), 
-                        Number(current[4]), 
-                        current[5] ? Number(current[5]) : undefined, 
-                        current[6] ? Number(current[6]) : undefined, 
-                        current[7] ? Number(current[7]) : undefined
-                    ),
+                    new BattleStatistics(Number(overall[0]),Number(overall[1]),Number(overall[2]),Number(overall[3]),Number(overall[4]),overall[5] ? Number(overall[5]) : undefined,overall[6] ? Number(overall[6]) : undefined,overall[7] ? Number(overall[7]) : undefined),
+                    new BattleStatistics(Number(current[1]),Number(current[2]),Number(current[3]),Number(current[4]),Number(current[5]),Number(current[6]),Number(current[7]),Number(current[8])),
                     achivements.map(a => a[1])
                 );
                 r();
@@ -270,19 +234,19 @@ class UserManager extends Manager {
         }
         return user;
     }
-
     /**
      * @returns {Promise<User>} A random user
+     * @emits ClientEvents.UserCacheUpdate
      */
     async random(): Promise<User> {
         let user = await this.fetch(await this.client.scrapper.fetchRandomUsername());
         if (!this.cache.has(user.username)) {
             this.cache.set(user.username, user);
+            this.client.emit(ClientEvents.UserCacheUpdate, { type: CacheUpdateTypes.Add, value: user });
         }
         return user;
     }
 }
-
 class Member {
     /**
      * The member's nickname
@@ -313,14 +277,13 @@ class MemberManager extends Manager {
      * The Artfight client
      */
     client: ArtfightClient;
-
     constructor(client: ArtfightClient, cache: Cache) {
         super(cache);
         this.client = client;
     }
-
     /**
      * @param {number} limit Maximum amount of members fetched
+     * @emits ClientEvents.MemberCacheUpdate
      * @returns {Promise<Member[]>} List of members
      */
     async fetch(limit: number): Promise<Member[]> {

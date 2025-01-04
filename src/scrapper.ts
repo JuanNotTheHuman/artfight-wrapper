@@ -1,10 +1,12 @@
 import puppeteer, { Page } from "puppeteer";
-import { Character,CharacterInformation} from "./character.js";
+import { Character,CharacterInformation,CharacterPartial} from "./character.js";
 import { ArtfightClient } from "./client.js";
 import { PageManager, TaskManager } from "./task.js";
-import { Submition, SubmitionInformation, SubmitionStatistics} from "./sumbition.js";
+import { Submition, SubmitionInformation, SubmitionStatistics,SubmitionPartial} from "./sumbition.js";
 import { ClientEvents, Complete } from "./Enumarables.js";
 import { Message } from "./message.js";
+import { Config } from "./config.js";
+import { link } from "fs";
 class ArtfightScrapper{
     /**
      * @type {ArtfightClient}
@@ -52,7 +54,10 @@ class ArtfightScrapper{
      * @returns {Promise<void>} Closes the browser ending the session
      */
     async logout(){
-        (await this.pages.get()).page.browser().close();
+        let {page} = await this.pages.get();
+        await page.goto("https://artfight.net/logout");
+        await page.browser().close();
+        this.pages = {} as PageManager;
     }
     /**
      * @param {string} username Nickname of the user
@@ -181,6 +186,7 @@ class ArtfightScrapper{
             })
             return {current:arr[1].map((value,index)=>index==0?value:parseFloat(value)),overall:arr[0].map(r=>parseFloat(r).toString()),achivements:achv};
         })
+        console.log(result);
         this.pages.return(index);
         return result;
     }
@@ -974,10 +980,50 @@ class ArtfightScrapper{
                 if (newMessages.length > 0) {
                     lastMessageTimestamp = newMessages[0].date;
                 }
-            }, 10000);
+            }, Config.MessageCheckInterval*1000);
         } catch (error) {
             console.error("Error in listenClientUserMessageReceived:", error);
         }
         }
-    }
+        /**
+         * @param limit The maximum amount of attacks to fetch **(not implemented)**
+         * @returns {Promise<SubmitionPartial[]>} List of attack partial data
+         */
+        async browseAttacks(limit:number){
+            let {page,index} = await this.pages.get();
+            await page.goto("https://artfight.net/browse/attacks");
+            let attacks=(await page.evaluate(()=>{
+                return Array.from(document.querySelectorAll(".col-6.col-md-3.col-lg-2")).map(r => {
+                    const firstChild = r.children.item(0);
+                    if (!firstChild) return null;
+                    const secondChild = firstChild.children.item(0);
+                    if (!secondChild) return null;
+                    let data = secondChild.children;
+                    return {icon:(data.item(0) as HTMLAnchorElement)?.href, title:data.item(1)?.textContent,link:(data.item(1) as HTMLAnchorElement)?.href}
+                }).filter(r => r !== null)
+            })) as SubmitionPartial[];
+            this.pages.return(index);
+            return attacks;
+        }
+        /**
+         * @param {number} limit The maximum amount of characters to fetch **(not implemented)**
+         * @returns {Promise<CharacterPartial[]>} List of character partial data
+         */
+        async browseCharacters(limit:number){
+            let {page,index} = await this.pages.get();
+            await page.goto("https://artfight.net/browse/characters");
+            let characters=(await page.evaluate(()=>{
+                return Array.from(document.querySelectorAll(".col-6.col-md-3.col-lg-2")).map(r => {
+                    const firstChild = r.children.item(0);
+                    if (!firstChild) return null;
+                    const secondChild = firstChild.children.item(0);
+                    if (!secondChild) return null;
+                    let data = secondChild.children;
+                    return {icon:(data.item(0) as HTMLAnchorElement)?.href, name:data.item(1)?.textContent,link:(data.item(1) as HTMLAnchorElement)?.href, id:(data.item(1) as HTMLAnchorElement)?.href.split("/")[-1].split(".")[-1]}
+                }).filter(r => r !== null)
+            })) as CharacterPartial[];
+            this.pages.return(index);
+            return characters;
+        }
+}
 export{ArtfightScrapper};

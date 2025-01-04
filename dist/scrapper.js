@@ -4,6 +4,7 @@ import { PageManager, TaskManager } from "./task.js";
 import { Submition, SubmitionInformation, SubmitionStatistics } from "./sumbition.js";
 import { ClientEvents, Complete } from "./Enumarables.js";
 import { Message } from "./message.js";
+import { Config } from "./config.js";
 class ArtfightScrapper {
     /**
      * @type {ArtfightClient}
@@ -26,7 +27,7 @@ class ArtfightScrapper {
      * @returns {Promise<void>} Logs in the user
      */
     async login(username, password) {
-        let browser = await puppeteer.launch({ headless: false });
+        let browser = await puppeteer.launch({ headless: true });
         this.pages = new PageManager();
         await this.pages.init(browser);
         let pg = await this.pages.get();
@@ -184,6 +185,7 @@ class ArtfightScrapper {
             });
             return { current: arr[1].map((value, index) => index == 0 ? value : parseFloat(value)), overall: arr[0].map(r => parseFloat(r).toString()), achivements: achv };
         });
+        console.log(result);
         this.pages.return(index);
         return result;
     }
@@ -978,7 +980,7 @@ class ArtfightScrapper {
                 if (newMessages.length > 0) {
                     lastMessageTimestamp = newMessages[0].date;
                 }
-            }, 10000);
+            }, Config.MessageCheckInterval * 1000);
         }
         catch (error) {
             console.error("Error in listenClientUserMessageReceived:", error);

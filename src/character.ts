@@ -4,7 +4,12 @@ import { Manager, Cache } from "./manager.js";
 import { Submition } from "./sumbition.js";
 import { CacheUpdateTypes, ClientEvents } from "./Enumarables.js";
 import { BookmarkCharacter } from "./bookmark.js";
-
+interface CharacterPartial{
+    icon:string;
+    name:string;
+    link:string;
+    id:string;
+}
 class Character {
     /**
      * Identification index of the character
@@ -46,7 +51,6 @@ class Character {
      * Comments on the character
      */
     comments: Comment[];
-
     constructor(
         id: string,
         name: string,
@@ -76,14 +80,16 @@ class Character {
      * @param client The Artfight client
      * @param order Order of the character
      * @param description Description of the bookmark `(not working)`
+     * @emits ClientEvents.BookmarkCacheUpdate
+     * @returns {Promise<boolean>} Returns true if the character was bookmarked
      */
-    async bookmark(client: ArtfightClient, order: string, description: string): Promise<void> {
+    async bookmark(client: ArtfightClient, order: string, description: string): Promise<boolean> {
         await client.scrapper.bookmarkCharacter(this.id, order, description);
         if (!client.user.bookmarks.cache.has(this.id)) {
             client.user.bookmarks.cache.set(this.id, this);
             client.emit(ClientEvents.BookmarkCacheUpdate, { type: CacheUpdateTypes.Add, value: client.user.bookmarks.cache.get(this.id) as BookmarkCharacter});
         }
-        
+        return client.user.bookmarks.cache.has(this.id);
     }
 
     /**
@@ -100,7 +106,7 @@ class Character {
     }
 
     /**
-     * Link to the character
+     * @returns {string} The link to the character's Artfight page
      */
     link(): string {
         return `https://artfight.net/character/${this.id}.${this.name}`;
@@ -135,15 +141,15 @@ class CharacterManager extends Manager {
      * The manager's client
      */
     client: ArtfightClient;
-
     constructor(client: ArtfightClient, cache: Cache) {
         super(cache);
         this.client = client;
     }
-
     /**
      * Fetches all of the User's characters
      * @param username The User's username
+     * @emits ClientEvents.CharacterCacheUpdate
+     * @returns {Promise<Character[]>} The User's characters
      */
     async fetch(username: string): Promise<Character[]> {
         let characters = await this.client.scrapper.fetchUserCharacters(username);
@@ -151,10 +157,11 @@ class CharacterManager extends Manager {
         this.client.emit(ClientEvents.CharacterCacheUpdate, { type: CacheUpdateTypes.Add, value: characters });
         return characters;
     }
-
     /**
      * Fetches a character by its identification index
      * @param id The character's identification index
+     * @emits ClientEvents.CharacterCacheUpdate
+     * @returns {Promise<Character>} The character
      */
     async fetchById(id: string): Promise<Character> {
         let character = await this.client.scrapper.fetchUserCharacter(`https://artfight.net/character/${id}`);
@@ -169,9 +176,10 @@ class CharacterManager extends Manager {
         }
         return character;
     }
-
     /**
      * Fetches a random character
+     * @emits ClientEvents.CharacterCacheUpdate
+     * @returns {Promise<Character>} A random character
      */
     async random(): Promise<Character> {
         let character = await this.client.scrapper.fetchRandomCharacter();
@@ -191,6 +199,8 @@ class CharacterManager extends Manager {
      * Searches for characters by tags
      * @param tags Character tags
      * @param limit Maximum amount of characters returned
+     * @emits ClientEvents.CharacterCacheUpdate
+     * @returns {Promise<Character[]>} List of characters
      */
     async tagSearch(tags: string | string[], limit: number): Promise<Character[]> {
         let characters = await this.client.scrapper.fetchCharactersByTag(tags, limit);
@@ -206,4 +216,4 @@ class CharacterManager extends Manager {
     }
 }
 
-export { CharacterManager, Character, CharacterInformation };
+export { CharacterManager, Character, CharacterInformation, CharacterPartial };

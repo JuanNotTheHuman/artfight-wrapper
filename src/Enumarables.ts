@@ -3,8 +3,8 @@
 import { ArtfightClient } from "./client.js";
 import { BookmarkCharacter } from "./bookmark.js";
 import { Member, User, ClientUser } from "./user.js";
-import { Character } from "./character.js";
-import { Submition } from "./sumbition.js";
+import { Character, CharacterPartial } from "./character.js";
+import { Submition, SubmitionPartial } from "./sumbition.js";
 import { Message } from "./message.js";
 /**
  * @enum {number}
@@ -44,6 +44,14 @@ enum ClientEvents {
      */
     AttackCacheUpdate = "attackCacheUpdate",
     /**
+     * Emitted when the browse attack cache is updated
+     */
+    BrowseAttackCacheUpdate = "browseAttackCacheUpdate",
+    /**
+     * Emitted when the browse character cache is updated
+     */
+    BrowseCharacterCacheUpdate = "browseCharacterCacheUpdate",
+    /**
      * Emitted when the defense cache is updated
      */
     DefenseCacheUpdate = "defenseCacheUpdate",
@@ -73,6 +81,8 @@ interface IClientEvents {
     [ClientEvents.AttackCacheUpdate]: [{ type: CacheUpdateTypes, value: Submition | Submition[] }];
     [ClientEvents.DefenseCacheUpdate]: [{ type: CacheUpdateTypes, value: Submition | Submition[] }];
     [ClientEvents.MessageCacheUpdate]: [{type:CacheUpdateTypes, value: Message|Message[]}]
+    [ClientEvents.BrowseAttackCacheUpdate]:[{type:CacheUpdateTypes,value:SubmitionPartial|SubmitionPartial[]}];
+    [ClientEvents.BrowseCharacterCacheUpdate]:[{type:CacheUpdateTypes,value:CharacterPartial|CharacterPartial[]}];
     [ClientEvents.Ready]: [client: ArtfightClient];
     [ClientEvents.ClientUserReady]: [user:ClientUser];
     [ClientEvents.MessageReceived]: [message:Message];
