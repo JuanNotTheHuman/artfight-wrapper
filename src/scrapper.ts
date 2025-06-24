@@ -3,9 +3,9 @@ import { Character,CharacterInformation,CharacterPartial} from "./character.js";
 import { ArtfightClient } from "./client.js";
 import { PageManager, TaskManager } from "./task.js";
 import { Submition, SubmitionInformation, SubmitionStatistics,SubmitionPartial} from "./sumbition.js";
-import { ClientEvents, Complete, NotificationType } from "./Enumarables.js";
+import { ClientEvents, Complete, NotificationType, SubscriptionNotificationType } from "./Enumarables.js";
 import { Message } from "./message.js";
-import { Notification } from "./notifications.js";
+import { Notification, Subscription } from "./notifications.js";
 class ArtfightScrapper{
     /**
      * @type {ArtfightClient}
@@ -943,8 +943,8 @@ class ArtfightScrapper{
      * Listens for new messages received by the client user.
      */
     async listenClientUserMessageReceived(): Promise<void> {
+        const { page, index } = await this.pages.get();
         try {
-            const { page, index } = await this.pages.get();
             await page.goto("https://artfight.net/messages");
             let lastMessageTimestamp: string = await page.evaluate(() => {
                 return document.querySelector("tbody tr")?.children.item(3)?.textContent?.trim() || "";
@@ -987,14 +987,14 @@ class ArtfightScrapper{
             }, this.client.options.messageCheckInterval);
         } catch (error) {
             console.error("Error in listenClientUserMessageReceived:", error);
+            this.pages.return(index);
         }
         }
         /**
-         * @param limit The maximum amount of attacks to fetch **(not implemented)**
+         * @param limit The maximum amount of attacks to fetch
          * @returns {Promise<SubmitionPartial[]>} List of attack partial data
          */
         async browseAttacks(limit:number){
-            //Implement limit
             let {page,index} = await this.pages.get();
             await page.goto("https://artfight.net/browse/attacks");
             let attacks=(await page.evaluate(()=>{
@@ -1007,15 +1007,15 @@ class ArtfightScrapper{
                     return {icon:(data.item(0)?.children.item(0) as HTMLImageElement)?.src, title:data.item(1)?.textContent,link:(data.item(1)?.children.item(0) as HTMLAnchorElement)?.href}
                 }).filter(r => r !== null)
             }));
+            attacks = attacks.slice(0, limit);
             this.pages.return(index);
             return attacks.map(r=>new SubmitionPartial(r.icon,r.title||"",r.link));
         }
         /**
-         * @param {number} limit The maximum amount of characters to fetch **(not implemented)**
+         * @param {number} limit The maximum amount of characters to fetch
          * @returns {Promise<CharacterPartial[]>} List of character partial data
          */
         async browseCharacters(limit:number){
-            //Implement limit
             let {page,index} = await this.pages.get();
             await page.goto("https://artfight.net/browse/characters");
             let characters=(await page.evaluate(()=>{
@@ -1033,6 +1033,7 @@ class ArtfightScrapper{
                 }).filter(r => r !== null)
             })) as CharacterPartial[];
             this.pages.return(index);
+            characters = characters.slice(0, limit);
             return characters.map(r=>new CharacterPartial(r.icon,r.name,r.link,r.id));
         }
         async fetchNotifications(limit:number){
@@ -1052,6 +1053,27 @@ class ArtfightScrapper{
             }))
             this.pages.return(index);
             return notifications.map(r=>new Notification(r.type=="Follow"?NotificationType.Follow:NotificationType.Other,r.content,r.timestamp?r.timestamp:""));
+        }
+        /**
+         * @param limit The maximum amount of subscriptions to fetch
+         * @returns {Promise<Subscription[]>} List of subscription data
+         */
+        async fetchSubscriptions(limit:number){
+            let {page,index} = await this.pages.get();
+            await page.goto("https://artfight.net/subscriptions");
+            let subscriptions = (await page.evaluate(()=>{
+                return Array.from(document.querySelectorAll(".card.mt-2")).map(r=>{
+                    let content = r.querySelector(".col-md-8")?.querySelector("div")?.textContent?.trim() || "";
+                    let type = SubscriptionNotificationType.Other;
+                    if(content.includes("has posted a new character"))type = SubscriptionNotificationType.CharacterAdd;
+                    let user = content.split(" ")[0].trim();
+                    let timestamp = r.querySelector(".text-muted")?.textContent?.trim() || "";
+                    return {type,content,user,timestamp} as Subscription;
+                })
+            }));
+            subscriptions = subscriptions.slice(0, limit);
+            this.pages.return(index);
+            return subscriptions;
         }
 }
 export{ArtfightScrapper};

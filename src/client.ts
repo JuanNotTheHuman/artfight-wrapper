@@ -13,7 +13,6 @@ import { NotificationManager } from './notifications.js';
 
 /**
  * @class ArtfightClient
- * @extends EventEmitter
  * @description A client for interacting with the Artfight API
  */
 class ArtfightClient extends EventEmitter {
@@ -64,10 +63,6 @@ class ArtfightClient extends EventEmitter {
    * Options for the client
    */
   options: ICLientOptions;
-  /**
-   * 
-   * @param options 
-   */
   constructor(options?:ICLientOptions) {
     super();
     this.options = options || {headless:true,taskLimit:5, messageCheckInterval:10,pageLimit:5};
@@ -82,10 +77,9 @@ class ArtfightClient extends EventEmitter {
     this.notifications = {} as NotificationManager;
     this.completes = Complete.None;
   }
-
   /**
    * Logs in the user and initializes the Artfight client.
-   * Emits a `Ready` event when the client is ready.
+   * Emits a `ClientEvents.Ready` event when the client is ready.
    * @param {string} username - Username for login
    * @param {string} password - Password for login
    * @param {Complete|Complete[]} completes - Allowed types (made for better CPU performance), specifies which types to fetch completely.
@@ -114,5 +108,4 @@ class ArtfightClient extends EventEmitter {
     return super.emit(event, ...args);
   }
 }
-
 export { ArtfightClient };

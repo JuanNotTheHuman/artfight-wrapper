@@ -3,31 +3,31 @@ import {Manager,Cache} from "./manager.js"
 import {CacheUpdateTypes,ClientEvents} from "./Enumarables.js"
 class BookmarkCharacter{
     /**
-     * @type {string} The character's identification index
+     * The character's identification index
      */
     id;
     /**
-     * @type {string} The character's name
+     * The character's name
      */
     name;
     /**
-     * @type {string} Url to the character's icon
+     * Url to the character's icon
      */
     icon;
     /**
-     * @type {string} Nickname of the character's owner
+     * Nickname of the character's owner
      */
     owner;
     /**
-     * @type {string} The bookmarks's description
+     * The bookmarks's description
      */
     description;
     /**
-     * @type {string} The timestamp of when the bookmark was last updated
+     * The timestamp of when the bookmark was last updated
      */
     updated;
     /**
-     * @type {string} The ordering index of the bookmark
+     * The ordering index of the bookmark
      */
     order;
     /**
@@ -59,14 +59,15 @@ class BookmarkCharacter{
      * Removes the bookmark from Artfight
      * @param {ArtfightClient} client The Artfight client
      * @emits ClientEvents.BookmarkCacheUpdate
-     * @returns {Promise<void>} Unbookmarks the character
+     * @returns {Promise<boolean>} Unbookmarks the character
      */
     async remove(client:ArtfightClient){
-        await client.scrapper.unbookmarkCharacter(this.id);
+        let res = await client.scrapper.unbookmarkCharacter(this.id);
         if(client.user.bookmarks.cache.has(this.id)){
             client.user.bookmarks.cache.delete(this.id);
             client.emit(ClientEvents.BookmarkCacheUpdate,{type:CacheUpdateTypes.Delete,value:this.id})
         }
+        return res;
     }
 }
 class BookmarkManager extends Manager{

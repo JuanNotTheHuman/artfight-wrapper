@@ -15,10 +15,12 @@ class Subscription{
     type:SubscriptionNotificationType;
     content:string;
     user:string;
-    constructor(type:SubscriptionNotificationType,content:string,user:string){
+    timestamp:string;
+    constructor(type:SubscriptionNotificationType,content:string,user:string,timestamp:string){
         this.type=type;
         this.content=content;
         this.user=user;
+        this.timestamp=timestamp;
     }
 }
 /**
@@ -59,9 +61,9 @@ class AttackNotificationManager extends Manager{
         super(cache)
         this.client = client;
     }
-    // override async fetch(){
+    async fetch(){
         
-    // }
+    }
 }
 /**
  * **To be implemented** need to wait till june
@@ -72,8 +74,24 @@ class SubscriptionNotificationManager extends Manager{
         super(cache)
         this.client = client;
     }
-    async fetch(){
-        
+    async fetch(limit: number = 5) {
+        let notifications = await this.client.scrapper.fetchSubscriptions(limit);
+        let newNotifications: Subscription[] = [];
+        for (let notification of notifications) {
+            const existingNotifications = this.cache.get(notification.type) as Subscription[] | undefined;
+            if (!existingNotifications?.some(r => r.content === notification.content && r.user === notification.user && r.type === notification.type)) {
+                newNotifications.push(notification);
+                if (existingNotifications) {
+                    this.cache.set(notification.type, existingNotifications.push(notification))
+                } else {
+                    this.cache.set(notification.type, [notification]);
+                }
+            }
+        }
+        if (newNotifications.length > 0) {
+            // Emit the event with the new notifications, not added yet
+        }
+        return notifications;
     }
 }
 export{NotificationManager,AttackNotificationManager,SubscriptionNotificationManager,Notification,Subscription}

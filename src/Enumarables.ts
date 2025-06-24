@@ -130,6 +130,7 @@ enum NotificationType{
 }
 enum SubscriptionNotificationType{
     CharacterAdd="characterAdd",
+    Other="other",
 }
 /**
  * Types of cache updates
