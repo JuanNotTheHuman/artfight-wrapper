@@ -2,10 +2,9 @@
 import { EventEmitter } from 'events';
 import { ArtfightScrapper } from './scrapper.js';
 import { ClientEvents, IClientEvents, ICLientOptions } from './Enumarables.js';
-import { ClientUser, UserManager, MemberManager } from './user.js';
+import { ClientUser, UserManager} from './user.js';
 import { SubmitionManager } from './sumbition.js';
 import { CharacterManager } from './character.js';
-import { BookmarkManager } from './bookmark.js';
 import { Cache } from './manager.js';
 import { Complete } from './Enumarables.js';
 import { MessageManager } from './message.js';
@@ -105,13 +104,13 @@ class ArtfightClient extends EventEmitter {
     this.browse = new ArtfightBrowse(this);
     this.emit(ClientEvents.Ready, this);
   }
-  on<Event extends keyof IClientEvents>(event: Event, listener: (...args: IClientEvents[Event]) => void): this {
+  override on<Event extends keyof IClientEvents>(event: Event, listener: (...args: IClientEvents[Event]) => void): this {
     if(event === ClientEvents.MessageReceived){
       this.scrapper.listenClientUserMessageReceived();
     }
     return super.on(event, listener);
   }
-  emit<Event extends keyof IClientEvents>(event: Event, ...args: IClientEvents[Event]): boolean {
+  override emit<Event extends keyof IClientEvents>(event: Event, ...args: IClientEvents[Event]): boolean {
     return super.emit(event, ...args);
   }
 }
