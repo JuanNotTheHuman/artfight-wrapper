@@ -9,6 +9,7 @@ import { Cache } from './manager.js';
 import { Complete } from './Enumarables.js';
 import { MessageManager } from './message.js';
 import { ArtfightBrowse } from './browse.js';
+import { NotificationManager } from './notifications.js';
 /**
  * @class ArtfightClient
  * @extends EventEmitter
@@ -47,6 +48,10 @@ class ArtfightClient extends EventEmitter {
      */
     messages;
     /**
+     * Artfight's notifications
+     */
+    notifications;
+    /**
      * Allowed types (made for better CPU performance), specifies which types to fetch completely.
      */
     completes;
@@ -64,6 +69,7 @@ class ArtfightClient extends EventEmitter {
         this.characters = {};
         this.messages = {};
         this.browse = {};
+        this.notifications = {};
         this.completes = Complete.None;
     }
     /**
@@ -82,6 +88,7 @@ class ArtfightClient extends EventEmitter {
         this.characters = new CharacterManager(this, new Cache());
         this.user = await new ClientUser(this, username).init();
         this.messages = new MessageManager(this, new Cache());
+        this.notifications = new NotificationManager(this, new Cache());
         this.completes = completes;
         this.browse = new ArtfightBrowse(this);
         this.emit(ClientEvents.Ready, this);

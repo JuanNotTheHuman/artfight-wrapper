@@ -1,11 +1,11 @@
 "use strict";
-
 import { ArtfightClient } from "./client.js";
 import { BookmarkCharacter } from "./bookmark.js";
 import { Member, User, ClientUser } from "./user.js";
 import { Character, CharacterPartial } from "./character.js";
 import { Submition, SubmitionPartial } from "./sumbition.js";
 import { Message } from "./message.js";
+import { Notification } from "./notifications.js";
 /**
  * @enum {number}
  */
@@ -67,11 +67,14 @@ enum ClientEvents {
      * Emitted when the client user is ready
      */
     ClientUserReady="clientUserReady",
-
     /**
      * Emitted when the client user reveices a message
      */
-    MessageReceived="messageReceived"
+    MessageReceived="messageReceived",
+    /**
+     * Emitted when the client user receives a notification
+     */
+    NotificationReceived="notificationReceived"
 }
 interface IClientEvents {
     [ClientEvents.BookmarkCacheUpdate]: [{ type: CacheUpdateTypes, value: (string | string[])|(BookmarkCharacter|BookmarkCharacter[]) }];
@@ -86,6 +89,7 @@ interface IClientEvents {
     [ClientEvents.Ready]: [client: ArtfightClient];
     [ClientEvents.ClientUserReady]: [user:ClientUser];
     [ClientEvents.MessageReceived]: [message:Message];
+    [ClientEvents.NotificationReceived]: [notifications:Notification|Notification[]]
 }
 /**
  * Names of events emitted by the task manager
@@ -97,6 +101,13 @@ enum TaskManagerEvents{
      */
     ExecutionStop="executionStop"
 }
+enum NotificationType{
+    Follow="follow",
+    Other="other"
+}
+enum SubscriptionNotificationType{
+    CharacterAdd="characterAdd",
+}
 /**
  * Types of cache updates
  * @enum {string}
@@ -105,4 +116,4 @@ enum CacheUpdateTypes{
     Add= "add",
     Delete="delete"
 };
-export{Complete,ClientEvents,TaskManagerEvents,CacheUpdateTypes,IClientEvents};
+export{Complete,ClientEvents,TaskManagerEvents,CacheUpdateTypes,IClientEvents,NotificationType,SubscriptionNotificationType};

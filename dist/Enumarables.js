@@ -67,6 +67,10 @@ var ClientEvents;
      * Emitted when the client user reveices a message
      */
     ClientEvents["MessageReceived"] = "messageReceived";
+    /**
+     * Emitted when the client user receives a notification
+     */
+    ClientEvents["NotificationReceived"] = "notificationReceived";
 })(ClientEvents || (ClientEvents = {}));
 /**
  * Names of events emitted by the task manager
@@ -79,6 +83,15 @@ var TaskManagerEvents;
      */
     TaskManagerEvents["ExecutionStop"] = "executionStop";
 })(TaskManagerEvents || (TaskManagerEvents = {}));
+var NotificationType;
+(function (NotificationType) {
+    NotificationType["Follow"] = "follow";
+    NotificationType["Other"] = "other";
+})(NotificationType || (NotificationType = {}));
+var SubscriptionNotificationType;
+(function (SubscriptionNotificationType) {
+    SubscriptionNotificationType["CharacterAdd"] = "characterAdd";
+})(SubscriptionNotificationType || (SubscriptionNotificationType = {}));
 /**
  * Types of cache updates
  * @enum {string}
@@ -89,4 +102,4 @@ var CacheUpdateTypes;
     CacheUpdateTypes["Delete"] = "delete";
 })(CacheUpdateTypes || (CacheUpdateTypes = {}));
 ;
-export { Complete, ClientEvents, TaskManagerEvents, CacheUpdateTypes };
+export { Complete, ClientEvents, TaskManagerEvents, CacheUpdateTypes, NotificationType, SubscriptionNotificationType };

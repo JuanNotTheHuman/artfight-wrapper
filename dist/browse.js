@@ -75,5 +75,43 @@ class BrowseCharacters extends Manager {
         }
         return characters;
     }
+    /**
+     * Fetches a random character
+     * @emits ClientEvents.CharacterCacheUpdate
+     * @returns {Promise<Character>} A random character
+     */
+    async random() {
+        let character = await this.client.scrapper.fetchRandomCharacter();
+        if (!this.cache.has(character.information.owner)) {
+            this.cache.set(character.information.owner, [character]);
+            this.client.emit(ClientEvents.CharacterCacheUpdate, { type: CacheUpdateTypes.Add, value: character });
+        }
+        else if (Array.isArray(this.cache.get(character.information.owner)) && !this.cache.get(character.information.owner).map(r => r.name).includes(character.name)) {
+            let ownerCharacters = this.cache.get(character.information.owner);
+            ownerCharacters.push(character);
+            this.cache.set(character.information.owner, ownerCharacters);
+            this.client.emit(ClientEvents.CharacterCacheUpdate, { type: CacheUpdateTypes.Add, value: character });
+        }
+        return character;
+    }
+    /**
+     * Searches for characters by tags
+     * @param tags Character tags
+     * @param limit Maximum amount of characters returned
+     * @emits ClientEvents.CharacterCacheUpdate
+     * @returns {Promise<Character[]>} List of characters
+     */
+    async tagSearch(tags, limit) {
+        let characters = await this.client.scrapper.fetchCharactersByTag(tags, limit);
+        for (let character of characters) {
+            const ownerCharacters = this.cache.get(character.information.owner);
+            if (!ownerCharacters.map(r => r.name).includes(character.name)) {
+                ownerCharacters.push(character);
+                this.cache.set(character.information.owner, ownerCharacters);
+                this.client.emit(ClientEvents.CharacterCacheUpdate, { type: CacheUpdateTypes.Add, value: character });
+            }
+        }
+        return characters;
+    }
 }
 export { ArtfightBrowse, BrowseAttacks, BrowseCharacters };

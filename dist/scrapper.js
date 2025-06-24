@@ -2,9 +2,10 @@ import puppeteer from "puppeteer";
 import { Character, CharacterInformation, CharacterPartial } from "./character.js";
 import { PageManager, TaskManager } from "./task.js";
 import { Submition, SubmitionInformation, SubmitionStatistics, SubmitionPartial } from "./sumbition.js";
-import { ClientEvents, Complete } from "./Enumarables.js";
+import { ClientEvents, Complete, NotificationType } from "./Enumarables.js";
 import { Message } from "./message.js";
 import { Config } from "./config.js";
+import { Notification } from "./notifications.js";
 class ArtfightScrapper {
     /**
      * @type {ArtfightClient}
@@ -43,7 +44,9 @@ class ArtfightScrapper {
         await redirect;
         let error = await page.$$(".alert-danger");
         if (error.length > 0) {
-            throw new Error("Invalid login credentials");
+            var message = await error[0].evaluate(r => r.textContent);
+            console.log(username, password);
+            throw new Error(message || "Login failed, unknown error");
         }
         this.pages.return(index);
         return;
@@ -352,7 +355,12 @@ class ArtfightScrapper {
             await page.goto(`https://artfight.net/~${username}/${type}s?page=${pageIndex + 1}`);
             await navigation;
             const submitions = await page.evaluate((type, limit) => {
-                const elements = document.querySelectorAll(`.profile-${type}s-body > div`)[0].children;
+                var elements = document.querySelectorAll(`.profile-${type}s-body > div`)[0];
+                if(elements){
+                    elements = elements.children;
+                }else{
+                    return [];
+                }
                 const submitions = Array.from(elements).map(element => {
                     const linkElement = element.querySelector('a');
                     const imageElement = linkElement?.querySelector('img');
@@ -503,7 +511,13 @@ class ArtfightScrapper {
         const page = pg.page;
         const index = pg.index;
         await page.goto("https://artfight.net/user/random");
-        await page.waitForSelector(".profile-normal-header");
+        try {
+            await page.waitForSelector(".profile-normal-header");
+        }
+        catch (e) {
+            console.log("Error while fetching random username");
+        }
+        ;
         const urlParts = page.url().split("/~");
         const username = urlParts.at(-1);
         this.pages.return(index);
@@ -993,6 +1007,7 @@ class ArtfightScrapper {
      * @returns {Promise<SubmitionPartial[]>} List of attack partial data
      */
     async browseAttacks(limit) {
+        //Implement limit
         let { page, index } = await this.pages.get();
         await page.goto("https://artfight.net/browse/attacks");
         let attacks = (await page.evaluate(() => {
@@ -1015,6 +1030,7 @@ class ArtfightScrapper {
      * @returns {Promise<CharacterPartial[]>} List of character partial data
      */
     async browseCharacters(limit) {
+        //Implement limit
         let { page, index } = await this.pages.get();
         await page.goto("https://artfight.net/browse/characters");
         let characters = (await page.evaluate(() => {
@@ -1035,6 +1051,25 @@ class ArtfightScrapper {
         }));
         this.pages.return(index);
         return characters.map(r => new CharacterPartial(r.icon, r.name, r.link, r.id));
+    }
+    async fetchNotifications(limit) {
+        let { page, index } = await this.pages.get();
+        await page.goto("https://artfight.net/notifications");
+        let notifications = (await page.evaluate(() => {
+            return Array.from(document.querySelectorAll(".card.mb-2")).map(r => {
+                let children = Array.from(r.querySelectorAll("td:not(:first-child):not(:last-child)")).map(r => r.textContent?.replace("\n", "").trim());
+                let type;
+                if (children[0]?.includes("is now following you!")) {
+                    type = "follow";
+                }
+                else {
+                    type = "other";
+                }
+                return { type, content: children[0], timestamp: children[1] };
+            });
+        }));
+        this.pages.return(index);
+        return notifications.map(r => new Notification(r.type == "Follow" ? NotificationType.Follow : NotificationType.Other, r.content, r.timestamp ? r.timestamp : ""));
     }
 }
 export { ArtfightScrapper };
