@@ -3,8 +3,7 @@
   "name": "artfight-wrapper",
   "version": "1.0.2",
   "main": "./dist/index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "keywords": [
     "artfight",
     "scraper",
@@ -15,7 +14,8 @@
   "license": "ISC",
   "dependencies": {
     "node-cache": "^5.1.2",
-    "puppeteer": "^22.13.0"
+    "puppeteer": "^22.13.0",
+    "events": "^3.3.0"
   },
   "description": "An Artfight Scrapper",
   "repository": "https://github.com/JuanNotTheHuman/Artfight",
