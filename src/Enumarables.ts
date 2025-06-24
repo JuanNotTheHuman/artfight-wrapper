@@ -91,6 +91,29 @@ interface IClientEvents {
     [ClientEvents.MessageReceived]: [message:Message];
     [ClientEvents.NotificationReceived]: [notifications:Notification|Notification[]]
 }
+interface ICLientOptions{
+    /**
+     * Whether to use headless mode or not
+     * @default true
+     */
+    headless: boolean;
+    /**
+     * Maximum amount of tasks to run at the same time
+     * @default 5
+     */
+    taskLimit: number;
+    /**
+     * Interval in seconds to check for new messages
+     * @default 10
+     */
+    messageCheckInterval: number;
+    /**
+     * Maximum amount of pages to manage overall
+     * @default 5
+     */
+    pageLimit: number;
+
+}
 /**
  * Names of events emitted by the task manager
  * @enum {string}
@@ -116,4 +139,4 @@ enum CacheUpdateTypes{
     Add= "add",
     Delete="delete"
 };
-export{Complete,ClientEvents,TaskManagerEvents,CacheUpdateTypes,IClientEvents,NotificationType,SubscriptionNotificationType};
+export{Complete,ClientEvents,TaskManagerEvents,CacheUpdateTypes,IClientEvents,NotificationType,SubscriptionNotificationType,ICLientOptions};

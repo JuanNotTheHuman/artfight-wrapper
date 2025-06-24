@@ -1,5 +1,4 @@
 import { Page, Browser } from 'puppeteer';
-import {Config} from "./config.js"
 import { EventEmitter } from 'events';
 class TaskManager extends EventEmitter {
     /**
@@ -10,18 +9,16 @@ class TaskManager extends EventEmitter {
      * List of tasks to complete
      */
     tasks: Promise<any>[] = [];
-    stopped: boolean;
-
     /**
-     * @param {number} [limit=50] Max amount of pages
+     * Whether the execution has been stopped
      */
-    constructor(limit: number = 50) {
+    stopped: boolean;
+    /**
+     * @param {number} [limit=5] Max amount of pages
+     */
+    constructor(limit: number = 5) {
         super();
-        if (Config.maxpages !== undefined && limit !== 50) {
-            this.limit = Config.maxpages;
-        } else {
-            this.limit = limit;
-        }
+        this.limit = limit;
         this.stopped = false;
         this.on('executionStop', (reason?:string) => {
             this.stopped = true;
@@ -68,9 +65,9 @@ class PageManager {
      * @param {Browser} browser The browser to manage the pages in
      * @returns {Promise<void>} Initializes the manager
      */
-    async init(browser: Browser): Promise<void> {
+    async init(browser: Browser,limit:number): Promise<void> {
         return new Promise<void>(async (resolve) => {
-            for (let i = 0; i < Config.maxpages - 1; i++) {
+            for (let i = 0; i < limit - 1; i++) {
                 await browser.newPage();
             }
             let index = 0;

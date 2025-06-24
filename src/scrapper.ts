@@ -5,8 +5,6 @@ import { PageManager, TaskManager } from "./task.js";
 import { Submition, SubmitionInformation, SubmitionStatistics,SubmitionPartial} from "./sumbition.js";
 import { ClientEvents, Complete, NotificationType } from "./Enumarables.js";
 import { Message } from "./message.js";
-import { Config } from "./config.js";
-import { link } from "fs";
 import { Notification } from "./notifications.js";
 class ArtfightScrapper{
     /**
@@ -30,9 +28,9 @@ class ArtfightScrapper{
      * @returns {Promise<void>} Logs in the user
      */
     async login(username:string,password:string){
-        let browser=await puppeteer.launch({headless:true});
+        let browser=await puppeteer.launch({headless:this.client.options.headless});
         this.pages=new PageManager();
-        await this.pages.init(browser);
+        await this.pages.init(browser,this.client.options.pageLimit);
         let pg = await this.pages.get();
         let page = pg.page;
         let index = pg.index;
@@ -986,7 +984,7 @@ class ArtfightScrapper{
                 if (newMessages.length > 0) {
                     lastMessageTimestamp = newMessages[0].date;
                 }
-            }, Config.MessageCheckInterval*1000);
+            }, this.client.options.messageCheckInterval);
         } catch (error) {
             console.error("Error in listenClientUserMessageReceived:", error);
         }

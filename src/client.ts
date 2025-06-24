@@ -1,7 +1,7 @@
 "use strict";
 import { EventEmitter } from 'events';
 import { ArtfightScrapper } from './scrapper.js';
-import { ClientEvents, IClientEvents } from './Enumarables.js';
+import { ClientEvents, IClientEvents, ICLientOptions } from './Enumarables.js';
 import { ClientUser, UserManager, MemberManager } from './user.js';
 import { SubmitionManager } from './sumbition.js';
 import { CharacterManager } from './character.js';
@@ -61,8 +61,17 @@ class ArtfightClient extends EventEmitter {
    * Artfight's browse feature
    */
   browse: ArtfightBrowse;
-  constructor() {
+  /**
+   * Options for the client
+   */
+  options: ICLientOptions;
+  /**
+   * 
+   * @param options 
+   */
+  constructor(options?:ICLientOptions) {
     super();
+    this.options = options || {headless:true,taskLimit:5, messageCheckInterval:10,pageLimit:5};
     this.scrapper = new ArtfightScrapper(this);
     this.user = {} as ClientUser;
     this.users = {} as UserManager;

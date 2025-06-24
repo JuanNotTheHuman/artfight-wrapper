@@ -193,7 +193,7 @@ class UserManager extends Manager {
      */
     async fetch(username: string): Promise<User> {
         const user = new User(this.client, username);
-        const manager = new TaskManager();
+        const manager = new TaskManager(this.client.options.taskLimit);
         manager.tasks.push(
             new Promise<void>(async (r) => {
                 const status = await this.client.scrapper.fetchUserStatus(username);
