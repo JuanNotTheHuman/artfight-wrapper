@@ -13,5 +13,3 @@ I won't add a option to submit an attack via code ever
 # Used packages
 - [node-cache](https://www.npmjs.com/package/node-cache)
 - [puppeteer](https://www.npmjs.com/package/puppeteer)
-- [typescript](https://www.npmjs.com/package/typescript)
-- [tslib]()
