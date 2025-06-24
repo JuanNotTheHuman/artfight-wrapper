@@ -355,12 +355,7 @@ class ArtfightScrapper {
             await page.goto(`https://artfight.net/~${username}/${type}s?page=${pageIndex + 1}`);
             await navigation;
             const submitions = await page.evaluate((type, limit) => {
-                var elements = document.querySelectorAll(`.profile-${type}s-body > div`)[0];
-                if(elements){
-                    elements = elements.children;
-                }else{
-                    return [];
-                }
+                const elements = document.querySelectorAll(`.profile-${type}s-body > div`)[0].children;
                 const submitions = Array.from(elements).map(element => {
                     const linkElement = element.querySelector('a');
                     const imageElement = linkElement?.querySelector('img');
